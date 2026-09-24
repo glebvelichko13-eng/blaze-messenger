@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Blaze 🔥</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+  body {
+    background: linear-gradient(135deg, #0b141a, #1f2c33);
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; color: #e9edef;
+  }
+  .box {
+    background: #202c33; padding: 30px; border-radius: 15px;
+    width: 360px; box-shadow: 0 10px 50px rgba(0,0,0,0.7);
+  }
+  h2 {
+    text-align: center; margin-bottom: 20px;
+    font-size: 28px;
+    background: linear-gradient(90deg, #ff6b00, #ffd700, #ff6b00);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+  input {
+    width: 100%; padding: 12px; margin-bottom: 12px;
+    background: #2a3942; border: none; border-radius: 8px;
+    color: #e9edef; font-size: 15px; outline: none;
+  }
+  input:focus { border: 1px solid #ff6b00; }
+  button {
+    width: 100%; padding: 12px; background: #ff6b00; color: white;
+    border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+    cursor: pointer; margin-top: 5px;
+  }
+  button:hover { background: #ff8c33; }
+  .toggle {
+    text-align: center; margin-top: 15px; font-size: 14px;
+    color: #8696a0; cursor: pointer;
+  }
+  .toggle:hover { color: #ff6b00; }
+  .error {
+    color: #ff6b6b; text-align: center; margin-top: 10px;
+    font-size: 14px; min-height: 18px;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2 id="title">🔥 Blaze</h2>
+  <input id="phone" placeholder="Номер телефона">
+  <input id="name" placeholder="Имя" class="hidden">
+  <input id="password" type="password" placeholder="Пароль">
+  <button onclick="submitForm()" id="btn">Войти</button>
+  <div class="toggle" onclick="toggleMode()" id="toggle">Нет аккаунта? Зарегистрироваться</div>
+  <div class="error" id="error"></div>
+</div>
+
+<script>
+  let isLogin = true;
+
+  function toggleMode() {
+    isLogin = !isLogin;
+    document.getElementById('title').textContent = isLogin ? '🔥 Blaze' : '🔥 Регистрация';
+    document.getElementById('btn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+    document.getElementById('toggle').textContent = isLogin
+      ? 'Нет аккаунта? Зарегистрироваться'
+      : 'Уже есть аккаунт? Войти';
+    document.getElementById('name').classList.toggle('hidden', isLogin);
+    document.getElementById('error').textContent = '';
+  }
+
+  async function submitForm() {
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+    const name = document.getElementById('name').value.trim();
+    const error = document.getElementById('error');
+    error.textContent = '';
+
+    if (!phone || !password) {
+      error.textContent = 'Заполни номер и пароль';
+      return;
+    }
+    if (!isLogin && !name) {
+      error.textContent = 'Введи имя';
+      return;
+    }
+
+    const url = isLogin ? '/login' : '/register';
+    const body = isLogin ? { phone, password } : { phone, password, name };
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        window.location.href = '/chat.html';
+      } else {
+        error.textContent = data.error || 'Ошибка';
+      }
+    } catch (e) {
+      error.textContent = 'Ошибка соединения';
+    }
+  }
+
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') submitForm();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Blaze 🔥</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+  body { background: #0b141a; height: 100vh; display: flex; justify-content: center; align-items: center; }
+  .app {
+    width: 100%; max-width: 950px; height: 95vh;
+    background: #111b21; display: flex;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+  }
+
+  .sidebar { width: 320px; background: #111b21; border-right: 1px solid #2a3942; display: flex; flex-direction: column; }
+  .sidebar-header {
+    background: #202c33; padding: 12px 15px;
+    color: #e9edef; font-weight: bold; font-size: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .blaze-logo {
+    background: linear-gradient(90deg, #ff6b00, #ffd700, #ff6b00);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+    font-size: 18px;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+  .sidebar-header .me { font-size: 12px; color: #8696a0; font-weight: normal; cursor: pointer; }
+  .sidebar-header .me:hover { color: #ff6b00; }
+  .header-btns { display: flex; gap: 5px; }
+  .header-btns button {
+    background: transparent; border: none; cursor: pointer;
+    font-size: 16px; padding: 4px 8px; border-radius: 5px;
+    color: #8696a0;
+  }
+  .header-btns button:hover { background: #2a3942; color: #fff; }
+  .admin-btn { color: #ffd700 !important; }
+  .admin-btn:hover { background: #ffd700 !important; color: #000 !important; }
+  .del-btn { color: #ff6b6b !important; }
+  .del-btn:hover { background: #ff6b6b !important; color: #fff !important; }
+
+  .stories-bar {
+    background: #111b21; padding: 12px 10px;
+    border-bottom: 1px solid #2a3942;
+    display: flex; gap: 10px; overflow-x: auto;
+  }
+  .story-circle {
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; flex-shrink: 0; width: 64px;
+  }
+  .story-ring {
+    width: 56px; height: 56px; border-radius: 50%;
+    padding: 3px; background: #2a3942;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .story-ring.unviewed {
+    background: linear-gradient(45deg, #ff6b00, #ffd700, #ff6b00);
+    background-size: 200% 200%;
+    animation: storyRotate 3s linear infinite;
+  }
+  @keyframes storyRotate {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .story-ring.viewed { background: #4a4a4a; }
+  .story-ring.add { background: #2a3942; border: 2px dashed #ff6b00; }
+  .story-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #111b21;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 18px;
+    overflow: hidden;
+  }
+  .story-inner img { width: 100%; height: 100%; object-fit: cover; }
+  .story-name {
+    color: #e9edef; font-size: 11px; margin-top: 5px;
+    text-align: center; width: 64px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .chats-list { flex: 1; overflow-y: auto; }
+  .chat-item {
+    padding: 12px 15px; cursor: pointer;
+    border-bottom: 1px solid #1f2c33;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .chat-item:hover { background: #202c33; }
+  .chat-item.active { background: #2a3942; }
+  .chat-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 16px; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .chat-avatar.group { background: #ff6b00; }
+  .chat-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .chat-info { flex: 1; overflow: hidden; }
+  .chat-title {
+    color: #e9edef; font-size: 15px; font-weight: bold;
+    display: flex; align-items: center; gap: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chat-title.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .chat-title.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .chat-status {
+    color: #ff6b00; font-size: 11px; margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-style: italic;
+  }
+  .chat-subtitle { color: #8696a0; font-size: 12px; }
+  .empty-chats { padding: 30px 15px; text-align: center; color: #8696a0; font-size: 14px; }
+
+  .create-btns { background: #202c33; padding: 8px; display: flex; gap: 6px; }
+  .create-btns button {
+    flex: 1; padding: 9px; border: none; border-radius: 8px;
+    background: #ff6b00; color: white; cursor: pointer;
+    font-size: 13px; font-weight: bold;
+  }
+  .create-btns button:hover { background: #ff8c33; }
+
+  .main { flex: 1; display: flex; flex-direction: column; background: #0b141a; position: relative; }
+  .main-header {
+    background: #202c33; padding: 12px 18px;
+    color: #e9edef; font-size: 16px; font-weight: bold;
+    border-bottom: 1px solid #1f2c33;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .main-header:hover { background: #2a3942; }
+  .main-header.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .main-header.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .main-header .msub { font-size: 11px; color: #ff6b00; font-weight: normal; font-style: italic; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
+  .msg {
+    max-width: 70%; padding: 7px 11px; border-radius: 10px;
+    background: #202c33; color: #e9edef; align-self: flex-start;
+    word-wrap: break-word; font-size: 15px;
+    display: flex; gap: 8px;
+    position: relative;
+  }
+  .msg.mine { background: #7a2e00; align-self: flex-end; }
+  .msg-body { flex: 1; min-width: 0; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 14px; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .msg-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .msg .name { font-size: 12px; color: #53bdeb; font-weight: bold; margin-bottom: 3px; cursor: pointer; }
+  .msg .name:hover { text-decoration: underline; }
+  .msg .name.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .msg .name.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .msg.mine .name { display: none; }
+  .msg.mine .msg-avatar { display: none; }
+  .msg .msg-status {
+    font-size: 10px; color: #ff6b00; font-style: italic; margin-bottom: 3px;
+  }
+  .msg .time { font-size: 10px; color: #8696a0; float: right; margin-left: 8px; margin-top: 5px; }
+
+  .msg-del-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.6); border: none;
+    color: #ff6b6b; cursor: pointer;
+    font-size: 14px; padding: 2px 6px; border-radius: 4px;
+    display: none; z-index: 5;
+  }
+  .msg:hover .msg-del-btn { display: block; }
+  .msg-del-btn:hover { background: #ff6b6b; color: white; }
+
+  .msg-image { max-width: 300px; max-height: 400px; border-radius: 8px; cursor: pointer; display: block; margin: 3px 0; }
+  .msg-video { max-width: 300px; max-height: 400px; border-radius: 8px; display: block; margin: 3px 0; }
+  .msg-audio { width: 100%; max-width: 300px; margin: 3px 0; }
+  .msg-sticker { width: 150px; height: 150px; object-fit: contain; display: block; margin: 3px 0; }
+  .msg-file {
+    display: flex; align-items: center; gap: 10px;
+    background: #111b21; padding: 10px; border-radius: 8px;
+    margin: 3px 0; cursor: pointer; text-decoration: none;
+    color: #e9edef; max-width: 300px;
+  }
+  .msg-file:hover { background: #1a262d; }
+  .msg-file .ficon { font-size: 30px; }
+  .msg-file .finfo { flex: 1; min-width: 0; }
+  .msg-file .fname { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-file .fsize { font-size: 11px; color: #8696a0; }
+
+  .empty-main { flex: 1; display: flex; align-items: center; justify-content: center; color: #8696a0; font-size: 15px; text-align: center; padding: 20px; }
+
+  .input-area { display: flex; padding: 10px; background: #202c33; gap: 8px; position: relative; }
+  .input-area input[type="text"] {
+    flex: 1; padding: 11px 15px; border: none; border-radius: 20px;
+    background: #2a3942; color: #e9edef; font-size: 15px; outline: none;
+  }
+  .input-area .icon-btn {
+    padding: 0 12px; border: none; border-radius: 20px;
+    background: #2a3942; color: #ff6b00; cursor: pointer; font-size: 20px;
+  }
+  .input-area .icon-btn:hover { background: #3a4952; }
+  .input-area .send-btn {
+    padding: 0 20px; border: none; border-radius: 20px;
+    background: #ff6b00; color: white; cursor: pointer; font-size: 18px; font-weight: bold;
+  }
+  .input-area .send-btn:hover { background: #ff8c33; }
+
+  .emoji-panel, .sticker-panel {
+    position: absolute; bottom: 60px; left: 10px;
+    background: #202c33; border-radius: 10px;
+    padding: 10px; width: 360px; max-height: 350px;
+    display: none; box-shadow: 0 0 20px rgba(0,0,0,0.6); z-index: 50;
+  }
+  .emoji-panel.active, .sticker-panel.active { display: block; }
+  .emoji-tabs, .sticker-tabs {
+    display: flex; gap: 5px; margin-bottom: 8px;
+    border-bottom: 1px solid #2a3942; padding-bottom: 8px;
+  }
+  .emoji-tabs button, .sticker-tabs button {
+    flex: 1; padding: 6px; background: #2a3942; color: #8696a0;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
+  }
+  .emoji-tabs button.active, .sticker-tabs button.active { background: #ff6b00; color: white; }
+  .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; max-height: 260px; overflow-y: auto; }
+  .emoji-grid button { padding: 6px; background: transparent; border: none; cursor: pointer; font-size: 22px; border-radius: 5px; }
+  .emoji-grid button:hover { background: #2a3942; }
+
+  .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 260px; overflow-y: auto; }
+  .sticker-grid .sticker-item {
+    position: relative; cursor: pointer; padding: 5px; border-radius: 8px;
+    background: #111b21; display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 1;
+  }
+  .sticker-grid .sticker-item:hover { background: #2a3942; }
+  .sticker-grid .sticker-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .sticker-grid .sticker-emoji { font-size: 42px; }
+  .sticker-grid .sticker-del {
+    position: absolute; top: 2px; right: 2px;
+    background: rgba(0,0,0,0.7); border: none;
+    color: #ff6b6b; cursor: pointer; font-size: 12px; padding: 1px 4px; border-radius: 3px;
+    display: none;
+  }
+  .sticker-grid .sticker-item:hover .sticker-del { display: block; }
+  .sticker-add-btn {
+    display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 1; background: #111b21; border: 2px dashed #ff6b00;
+    border-radius: 8px; cursor: pointer; color: #ff6b00; font-size: 30px;
+  }
+  .sticker-add-btn:hover { background: #2a3942; }
+
+  .modal {
+    display: none; position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75); z-index: 100;
+    justify-content: center; align-items: center;
+  }
+  .modal.active { display: flex; }
+  .modal-box {
+    background: #202c33; padding: 22px; border-radius: 12px;
+    width: 400px; max-height: 85vh; overflow-y: auto; color: #e9edef;
+  }
+  .modal-box h3 { margin-bottom: 15px; color: #ff6b00; }
+  .modal-box input[type="text"], .modal-box input[type="password"] {
+    width: 100%; padding: 11px; margin-bottom: 12px;
+    background: #2a3942; border: none; border-radius: 8px;
+    color: #e9edef; font-size: 14px; outline: none;
+  }
+  .modal-box .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .modal-box .actions button {
+    flex: 1; padding: 11px; border: none; border-radius: 8px;
+    cursor: pointer; font-weight: bold; font-size: 14px;
+  }
+  .modal-box .actions .primary { background: #ff6b00; color: white; }
+  .modal-box .actions .cancel { background: #2a3942; color: #e9edef; }
+  .modal-box .actions .danger { background: #ff6b6b; color: white; }
+
+  .search-result {
+    background: #111b21; padding: 12px; border-radius: 8px;
+    margin-bottom: 10px; color: #e9edef; font-size: 14px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .search-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 18px; flex-shrink: 0; overflow: hidden;
+  }
+  .search-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .search-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .search-info { flex: 1; }
+  .search-result .sname { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+  .search-result .sname.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .search-result .sname.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .search-result .sstatus { font-size: 12px; color: #ff6b00; font-style: italic; margin-top: 3px; }
+
+  .profile-box { text-align: center; }
+  .profile-avatar {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: #6a7175; margin: 0 auto 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; font-weight: bold; color: white;
+    overflow: hidden; position: relative;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .profile-name { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
+  .profile-name.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .profile-name.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .profile-status {
+    font-size: 14px; color: #ff6b00; font-style: italic;
+    background: #111b21; padding: 8px 12px; border-radius: 8px;
+    margin-bottom: 15px; word-wrap: break-word;
+  }
+  .profile-status.empty { color: #8696a0; font-style: normal; }
+
+  .admin-box { width: 750px; }
+  .admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+  .admin-tabs button {
+    padding: 8px 15px; background: #2a3942; color: #8696a0;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .admin-tabs button.active { background: #ff6b00; color: white; }
+  .admin-stats { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+  .admin-stat { flex: 1; min-width: 100px; background: #111b21; padding: 12px; border-radius: 8px; text-align: center; }
+  .admin-stat .num { font-size: 22px; color: #ff6b00; font-weight: bold; }
+  .admin-stat .lbl { font-size: 12px; color: #8696a0; }
+
+  .admin-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; font-size: 14px;
+  }
+  .admin-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 16px; flex-shrink: 0; overflow: hidden;
+  }
+  .admin-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .admin-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .admin-user .info { flex: 1; }
+  .admin-user .info .uname { font-weight: bold; display: flex; align-items: center; gap: 4px; }
+  .admin-user .info .uname.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .admin-user .info .uname.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .admin-user .info .uphone { color: #8696a0; font-size: 12px; }
+  .admin-user .info .ucreated { color: #53bdeb; font-size: 11px; }
+  .admin-user .info .ustatus { color: #ff6b00; font-size: 11px; font-style: italic; }
+  .admin-user .info .banned-tag { color: #ff6b6b; font-size: 11px; margin-left: 5px; }
+  .admin-user button {
+    padding: 6px 12px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 12px; font-weight: bold; margin-left: 3px;
+  }
+  .ban-btn { background: #ff6b6b; color: white; }
+  .unban-btn { background: #00a884; color: white; }
+
+  .admin-chats .admin-chat {
+    padding: 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; cursor: pointer; font-size: 13px;
+  }
+  .admin-chat:hover { background: #2a3942; }
+  .admin-chat .cname { font-weight: bold; margin-bottom: 3px; }
+  .admin-chat .cmembers { color: #8696a0; font-size: 12px; }
+
+  .admin-messages { max-height: 400px; overflow-y: auto; }
+  .admin-messages .amsg {
+    padding: 8px 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .admin-messages .amsg .aname { color: #53bdeb; font-weight: bold; font-size: 12px; }
+  .admin-messages .amsg .atime { color: #8696a0; font-size: 11px; float: right; }
+
+  /* СТАТУСЫ В АДМИНКЕ */
+  .status-create {
+    display: flex; gap: 6px; margin-bottom: 15px;
+  }
+  .status-create input[type="text"] {
+    flex: 1; padding: 9px; background: #2a3942;
+    border: none; border-radius: 6px; color: #e9edef; font-size: 13px; outline: none;
+  }
+  .status-create input.emoji-input { flex: 0 0 60px; text-align: center; font-size: 18px; }
+  .status-create button {
+    padding: 9px 15px; background: #ff6b00; color: white;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
+  }
+  .status-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; background: #111b21; border-radius: 8px;
+    margin-bottom: 5px; font-size: 14px;
+  }
+  .status-item .semoji { font-size: 20px; }
+  .status-item .stext { flex: 1; }
+  .status-item button {
+    padding: 4px 10px; background: #ff6b6b; color: white;
+    border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;
+  }
+
+  .give-status-box {
+    background: #111b21; padding: 15px; border-radius: 10px;
+    margin-top: 15px; border: 1px solid #2a3942;
+  }
+  .give-status-box h4 { color: #ff6b00; margin-bottom: 10px; font-size: 14px; }
+  .give-status-box select {
+    width: 100%; padding: 9px; margin-bottom: 8px;
+    background: #2a3942; border: none; border-radius: 6px;
+    color: #e9edef; font-size: 13px; outline: none;
+  }
+  .give-status-box input[type="text"] {
+    width: 100%; padding: 9px; margin-bottom: 8px;
+    background: #2a3942; border: none; border-radius: 6px;
+    color: #e9edef; font-size: 13px; outline: none;
+  }
+  .give-status-box button {
+    width: 100%; padding: 10px; background: #ff6b00; color: white;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
+  }
+
+  .quick-statuses { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .quick-statuses button {
+    padding: 6px 10px; background: #111b21; border: 1px solid #2a3942;
+    border-radius: 15px; color: #e9edef; cursor: pointer;
+    font-size: 12px; margin: 0;
+  }
+  .quick-statuses button:hover { background: #ff6b00; border-color: #ff6b00; }
+
+  /* ИСТОРИИ */
+  .story-viewer {
+    display: none; position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #000; z-index: 200;
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .story-viewer.active { display: flex; }
+  .story-progress {
+    position: absolute; top: 10px; left: 10px; right: 10px;
+    display: flex; gap: 3px; z-index: 10;
+  }
+  .story-progress-bar {
+    flex: 1; height: 3px; background: rgba(255,255,255,0.3);
+    border-radius: 2px; overflow: hidden;
+  }
+  .story-progress-fill { height: 100%; background: white; width: 0%; }
+  .story-header {
+    position: absolute; top: 25px; left: 15px; right: 15px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: white; z-index: 10;
+  }
+  .story-author { display: flex; align-items: center; gap: 10px; }
+  .story-author-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; font-weight: bold;
+  }
+  .story-author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .story-author-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .story-author-name { font-weight: bold; font-size: 15px; }
+  .story-author-name.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .story-author-name.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .story-time { font-size: 12px; color: #ccc; }
+  .story-close {
+    background: rgba(0,0,0,0.5); border: none; color: white;
+    font-size: 24px; cursor: pointer; padding: 5px 10px;
+    border-radius: 50%; width: 40px; height: 40px;
+  }
+  .story-content { max-width: 100%; max-height: 80vh; display: flex; align-items: center; justify-content: center; }
+  .story-content img, .story-content video { max-width: 100vw; max-height: 80vh; object-fit: contain; }
+  .story-caption {
+    position: absolute; bottom: 40px; left: 20px; right: 20px;
+    color: white; text-align: center; font-size: 16px;
+    background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;
+  }
+  .story-nav { position: absolute; top: 0; bottom: 0; width: 30%; cursor: pointer; z-index: 5; }
+  .story-nav.left { left: 0; }
+  .story-nav.right { right: 0; }
+  .story-footer { position: absolute; bottom: 10px; left: 20px; color: #ccc; font-size: 13px; }
+  .story-delete {
+    position: absolute; bottom: 10px; right: 20px;
+    background: #ff6b6b; border: none; color: white;
+    padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold;
+  }
+
+  .viewers-list { max-height: 300px; overflow-y: auto; }
+  .viewer-item {
+    padding: 8px 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 5px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .viewer-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; overflow: hidden;
+  }
+  .viewer-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .viewer-avatar.creator { background: linear-gradient(135deg, #00ff88, #ffd700); }
+  .viewer-item .vname { font-weight: bold; }
+  .viewer-item .vname.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .viewer-item .vname.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .viewer-item .vtime { color: #8696a0; font-size: 11px; }
+
+  .upload-preview {
+    width: 100%; max-height: 250px; object-fit: contain;
+    background: #111b21; border-radius: 8px; margin-bottom: 12px;
+  }
+
+  .image-viewer {
+    display: none; position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 300;
+    justify-content: center; align-items: center; cursor: zoom-out;
+  }
+  .image-viewer.active { display: flex; }
+  .image-viewer img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+  .image-viewer .close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+
+  .uploading {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #202c33; color: #ff6b00;
+    padding: 20px 40px; border-radius: 12px;
+    font-size: 16px; font-weight: bold; z-index: 500; display: none;
+  }
+  .uploading.active { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div>
+        <span class="blaze-logo">🔥 Blaze</span>
+        <div class="me" id="me" onclick="openMyProfile()">Загрузка...</div>
+      </div>
+      <div class="header-btns">
+        <button id="adminBtn" class="admin-btn" style="display:none;" onclick="openAdminLogin()" title="Админ-панель">👑</button>
+        <button class="del-btn" onclick="openDeleteAccount()" title="Удалить аккаунт">🗑</button>
+        <button onclick="logout()" title="Выйти">⏻</button>
+      </div>
+    </div>
+
+    <div class="stories-bar" id="storiesBar"></div>
+
+    <div class="chats-list" id="chatsList"></div>
+    <div class="create-btns">
+      <button onclick="openPrivateModal()">+ Личный</button>
+      <button onclick="openGroupModal()">+ Группа</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="mainHeader" class="main-header" style="display:none;" onclick="openCurrentProfile()"></div>
+    <div class="messages" id="messages" style="display:none;"></div>
+    <div class="empty-main" id="emptyMain">Выбери чат слева<br>или создай новый</div>
+    <div class="input-area" id="inputArea" style="display:none;">
+      <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Прикрепить файл">📎</button>
+      <input id="msgInput" type="text" placeholder="Сообщение..." autocomplete="off">
+      <button class="icon-btn" onclick="toggleEmojiPanel()" title="Смайлы">😀</button>
+      <button class="icon-btn" onclick="toggleStickerPanel()" title="Стикеры">🎨</button>
+      <button class="send-btn" onclick="send()">➤</button>
+    </div>
+
+    <div class="emoji-panel" id="emojiPanel">
+      <div class="emoji-tabs">
+        <button class="active" onclick="showEmojiTab('faces', this)">😀 Лица</button>
+        <button onclick="showEmojiTab('gestures', this)">👍 Жесты</button>
+        <button onclick="showEmojiTab('hearts', this)">❤️ Сердца</button>
+      </div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+
+    <div class="sticker-panel" id="stickerPanel">
+      <div class="sticker-tabs">
+        <button class="active" onclick="showStickerTab('standard', this)">🌟 Стандартные</button>
+        <button onclick="showStickerTab('mine', this)">🎨 Мои</button>
+      </div>
+      <div class="sticker-grid" id="stickerGrid"></div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" style="display:none;" onchange="uploadFile(this)">
+<input type="file" id="stickerFileInput" accept="image/*" style="display:none;" onchange="uploadSticker(this)">
+
+<div class="modal" id="privateModal">
+  <div class="modal-box">
+    <h3>🔍 Найти по номеру</h3>
+    <input id="searchPhone" type="text" placeholder="+79990000001">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('privateModal')">Отмена</button>
+      <button class="primary" onclick="searchUser()">Найти</button>
+    </div>
+    <div id="searchResult" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<div class="modal" id="groupModal">
+  <div class="modal-box">
+    <h3>👥 Новая группа</h3>
+    <input id="groupName" type="text" placeholder="Название группы">
+    <p style="color:#8696a0;font-size:12px;margin-bottom:8px;">Добавляй участников по номеру:</p>
+    <input id="groupPhone" type="text" placeholder="Номер телефона">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('groupModal')">Отмена</button>
+      <button class="primary" onclick="addGroupUser()">+ Добавить</button>
+    </div>
+    <div id="groupMembers" style="margin-top:10px;"></div>
+    <div class="actions">
+      <button class="primary" onclick="createGroup()">Создать группу</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="adminLoginModal">
+  <div class="modal-box">
+    <h3>🔐 Вход в админ-панель</h3>
+    <input id="adminPassword" type="password" placeholder="Пароль">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('adminLoginModal')">Отмена</button>
+      <button class="primary" onclick="checkAdminPassword()">Войти</button>
+    </div>
+    <div id="adminError" style="color:#ff6b6b;font-size:13px;margin-top:10px;"></div>
+  </div>
+</div>
+
+<div class="modal" id="adminPanel">
+  <div class="modal-box admin-box">
+    <h3>👑 Админ-панель Blaze</h3>
+    <div class="admin-stats" id="adminStats"></div>
+    <div class="admin-tabs">
+      <button class="active" onclick="showAdminTab('users', this)">👥 Пользователи</button>
+      <button onclick="showAdminTab('chats', this)">💬 Чаты</button>
+      <button onclick="showAdminTab('stories', this)">🌟 Истории</button>
+      <button onclick="showAdminTab('statuses', this)">📊 Статусы</button>
+    </div>
+    <div id="adminUsers"></div>
+    <div id="adminChats" style="display:none;"></div>
+    <div id="adminStories" style="display:none;"></div>
+    <div id="adminStatuses" style="display:none;"></div>
+    <div class="actions" style="margin-top:15px;">
+      <button class="cancel" onclick="closeModal('adminPanel')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="adminChatView">
+  <div class="modal-box admin-box">
+    <h3 id="adminChatTitle">💬 Просмотр чата</h3>
+    <div class="admin-messages" id="adminMessages"></div>
+    <div class="actions" style="margin-top:15px;">
+      <button class="cancel" onclick="closeModal('adminChatView')">Назад</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="profileModal">
+  <div class="modal-box profile-box">
+    <div class="profile-avatar" id="profileAvatar" onclick="openAvatarUpload()">?</div>
+    <div class="profile-name" id="profileName">Имя</div>
+    <div class="profile-status" id="profileStatus">Статус</div>
+    <div class="actions" id="profileActions"></div>
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('profileModal')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="statusModal">
+  <div class="modal-box">
+    <h3>📊 Выбрать статус</h3>
+    <div class="quick-statuses" id="quickStatuses"></div>
+    <input id="statusInput" type="text" placeholder="Свой статус (только для Creator)..." maxlength="100">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('statusModal')">Отмена</button>
+      <button class="primary" onclick="saveStatus()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="uploadStoryModal">
+  <div class="modal-box">
+    <h3>🌟 Новая история</h3>
+    <input type="file" id="storyFile" accept="image/*,video/*" onchange="previewStory(this)">
+    <div id="storyPreviewBox"></div>
+    <input id="storyCaption" type="text" placeholder="Подпись (необязательно)" maxlength="200">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('uploadStoryModal')">Отмена</button>
+      <button class="primary" onclick="uploadStory()">Опубликовать</button>
+    </div>
+    <div id="uploadError" style="color:#ff6b6b;font-size:13px;margin-top:10px;"></div>
+  </div>
+</div>
+
+<div class="modal" id="viewersModal">
+  <div class="modal-box">
+    <h3>👁 Просмотры</h3>
+    <div class="viewers-list" id="viewersList"></div>
+    <div class="actions" style="margin-top:15px;">
+      <button class="cancel" onclick="closeModal('viewersModal')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="deleteAccountModal">
+  <div class="modal-box">
+    <h3>🗑 Удалить аккаунт</h3>
+    <p style="color:#e9edef;font-size:14px;margin-bottom:15px;">
+      Ты уверен? Все чаты, сообщения, истории и аккаунт будут <b>навсегда удалены</b>.
+    </p>
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('deleteAccountModal')">Отмена</button>
+      <button class="danger" onclick="deleteAccount()">Удалить навсегда</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="msgActionModal">
+  <div class="modal-box">
+    <h3>Что сделать с сообщением?</h3>
+    <div class="actions" style="flex-direction: column;">
+      <button class="cancel" onclick="deleteMsgForMe()">🗑 Удалить у себя</button>
+      <button class="danger" id="deleteForAllBtn" onclick="deleteMsgForAll()" style="display:none;">🌐 Удалить у всех</button>
+      <button class="cancel" onclick="closeModal('msgActionModal')">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
+
+<div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+  <div class="close" onclick="closeImageViewer()">✕</div>
+  <img id="imageViewerImg" src="" onclick="event.stopPropagation()">
+</div>
+
+<div class="uploading" id="uploadingBox">📤 Загрузка...</div>
+
+<div class="story-viewer" id="storyViewer">
+  <div class="story-progress" id="storyProgress"></div>
+  <div class="story-header">
+    <div class="story-author">
+      <div class="story-author-avatar" id="storyAuthorAvatar"></div>
+      <div>
+        <div class="story-author-name" id="storyAuthorName"></div>
+        <div class="story-time" id="storyTime"></div>
+      </div>
+    </div>
+    <button class="story-close" onclick="closeStoryViewer()">✕</button>
+  </div>
+  <div class="story-nav left" onclick="prevStory()"></div>
+  <div class="story-content" id="storyContent"></div>
+  <div class="story-nav right" onclick="nextStory()"></div>
+  <div class="story-caption" id="storyCaption2" style="display:none;"></div>
+  <div class="story-footer" id="storyFooter"></div>
+  <button class="story-delete" id="storyDeleteBtn" style="display:none;" onclick="deleteCurrentStory()">🗑 Удалить</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const EMOJI_FACES = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','💩','🤡','👹','👺','👻','👽','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
+  const EMOJI_GESTURES = ['👋','🤚','✋','🖐️','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪','🦾','✍️','💅','🤳'];
+  const EMOJI_HEARTS = ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','⭐','🌟','✨','💫','🔥','💯','🎉','🎊','🎁','🎈'];
+
+  let currentEmojiTab = 'faces';
+  let currentStickerTab = 'standard';
+  let myStickers = [];
+  let currentMsgToDelete = null;
+  let availableStatuses = [];
+
+  let socket = null;
+  let me = null;
+  let currentChatId = null;
+  let currentChatData = null;
+  let groupMembersList = [];
+  let allStories = [];
+  let currentStoryGroup = 0;
+  let currentStoryIndex = 0;
+  let storyTimer = null;
+  let storyProgressInterval = null;
+  let currentProfileId = null;
+
+  async function init() {
+    try {
+      const res = await fetch('/me');
+      const data = await res.json();
+      if (!data.ok) { window.location.href = '/'; return; }
+
+      me = data;
+      updateMeLabel();
+
+      if (me.role === 'creator') {
+        document.getElementById('adminBtn').style.display = 'block';
+      }
+
+      socket = io({ query: { userId: me.id, name: me.name, role: me.role } });
+
+      socket.on('message', (m) => {
+        if (m.chatId === currentChatId) addMessage(m);
+      });
+      socket.on('message_deleted', ({ messageId }) => {
+        const el = document.getElementById('msg_' + messageId);
+        if (el) el.remove();
+      });
+      socket.on('new_story', () => loadStories());
+      socket.on('avatar_update', () => { loadChats(); loadStories(); });
+
+      await loadChats();
+      await loadStories();
+      await loadStickers();
+      await loadStatuses();
+    } catch (e) {
+      console.error('Ошибка:', e);
+      document.getElementById('me').textContent = 'Ошибка загрузки';
+    }
+  }
+
+  function updateMeLabel() {
+    document.getElementById('me').textContent = me.name + (me.role === 'creator' ? ' 👑' : '') + (me.status ? ' • ' + me.status : '');
+  }
+
+  // ===== СТАТУСЫ =====
+  async function loadStatuses() {
+    try {
+      const res = await fetch('/statuses');
+      const data = await res.json();
+      if (data.ok) availableStatuses = data.statuses;
+    } catch(e) { console.error('Ошибка статусов:', e); }
+  }
+
+  function openStatusModal() {
+    document.getElementById('statusInput').value = me.role === 'creator' ? (me.status || '') : '';
+    document.getElementById('statusInput').style.display = me.role === 'creator' ? 'block' : 'none';
+
+    const box = document.getElementById('quickStatuses');
+    box.innerHTML = '';
+
+    availableStatuses.forEach(s => {
+      const btn = document.createElement('button');
+      const fullStatus = s.emoji ? `${s.emoji} ${s.text}` : s.text;
+      btn.textContent = fullStatus;
+      btn.onclick = () => {
+        document.getElementById('statusInput').value = fullStatus;
+      };
+      box.appendChild(btn);
+    });
+
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = '🗑 Очистить';
+    clearBtn.onclick = () => {
+      document.getElementById('statusInput').value = '';
+    };
+    box.appendChild(clearBtn);
+
+    document.getElementById('statusModal').classList.add('active');
+  }
+
+  function setQuickStatus(status) {
+    document.getElementById('statusInput').value = status;
+  }
+
+  async function saveStatus() {
+    const status = document.getElementById('statusInput').value.trim();
+    const res = await fetch('/set-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      me.status = data.status;
+      updateMeLabel();
+      closeModal('statusModal');
+      await loadChats();
+    } else {
+      alert(data.error || 'Ошибка');
+    }
+  }
+
+  // ===== СМАЙЛЫ =====
+  function toggleEmojiPanel() {
+    document.getElementById('stickerPanel').classList.remove('active');
+    document.getElementById('emojiPanel').classList.toggle('active');
+    if (document.getElementById('emojiPanel').classList.contains('active')) renderEmojiGrid();
+  }
+
+  function showEmojiTab(tab, btn) {
+    currentEmojiTab = tab;
+    document.querySelectorAll('.emoji-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderEmojiGrid();
+  }
+
+  function renderEmojiGrid() {
+    const grid = document.getElementById('emojiGrid');
+    grid.innerHTML = '';
+    let list = [];
+    if (currentEmojiTab === 'faces') list = EMOJI_FACES;
+    else if (currentEmojiTab === 'gestures') list = EMOJI_GESTURES;
+    else list = EMOJI_HEARTS;
+
+    list.forEach(e => {
+      const btn = document.createElement('button');
+      btn.textContent = e;
+      btn.onclick = () => {
+        const input = document.getElementById('msgInput');
+        input.value += e;
+        input.focus();
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  // ===== СТИКЕРЫ =====
+  function toggleStickerPanel() {
+    document.getElementById('emojiPanel').classList.remove('active');
+    document.getElementById('stickerPanel').classList.toggle('active');
+    if (document.getElementById('stickerPanel').classList.contains('active')) renderStickerGrid();
+  }
+
+  function showStickerTab(tab, btn) {
+    currentStickerTab = tab;
+    document.querySelectorAll('.sticker-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderStickerGrid();
+  }
+
+  function renderStickerGrid() {
+    const grid = document.getElementById('stickerGrid');
+    grid.innerHTML = '';
+
+    if (currentStickerTab === 'standard') {
+      const standard = [...EMOJI_FACES.slice(0, 40), ...EMOJI_HEARTS.slice(0, 10)];
+      standard.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'sticker-item';
+        div.onclick = () => sendEmojiSticker(e);
+        div.innerHTML = `<div class="sticker-emoji">${e}</div>`;
+        grid.appendChild(div);
+      });
+    } else {
+      const addBtn = document.createElement('div');
+      addBtn.className = 'sticker-add-btn';
+      addBtn.innerHTML = '➕';
+      addBtn.onclick = () => document.getElementById('stickerFileInput').click();
+      grid.appendChild(addBtn);
+
+      myStickers.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'sticker-item';
+        div.innerHTML = `
+          <img src="${s.file_url}">
+          <button class="sticker-del" onclick="event.stopPropagation(); deleteSticker(${s.id})">🗑</button>
+        `;
+        div.onclick = () => sendImageSticker(s.file_url);
+        grid.appendChild(div);
+      });
+    }
+  }
+
+  async function loadStickers() {
+    try {
+      const res = await fetch('/stickers');
+      const data = await res.json();
+      if (data.ok) myStickers = data.stickers;
+    } catch(e) { console.error('Ошибка:', e); }
+  }
+
+  async function uploadSticker(input) {
+    if (!input.files || !input.files[0]) return;
+    const formData = new FormData();
+    formData.append('file', input.files[0]);
+
+    try {
+      const res = await fetch('/stickers/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.ok) {
+        await loadStickers();
+        renderStickerGrid();
+      } else {
+        alert(data.error || 'Ошибка');
+      }
+    } catch(e) { alert('Ошибка загрузки стикера'); }
+    input.value = '';
+  }
+
+  async function deleteSticker(id) {
+    if (!confirm('Удалить стикер?')) return;
+    try {
+      const res = await fetch('/stickers/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.ok) { await loadStickers(); renderStickerGrid(); }
+    } catch(e) { alert('Ошибка'); }
+  }
+
+  function sendEmojiSticker(emoji) {
+    if (!currentChatId) { alert('Сначала открой чат'); return; }
+    socket.emit('sticker', { chatId: currentChatId, emoji: emoji });
+    document.getElementById('stickerPanel').classList.remove('active');
+  }
+
+  function sendImageSticker(url) {
+    if (!currentChatId) { alert('Сначала открой чат'); return; }
+    socket.emit('sticker', { chatId: currentChatId, url: url });
+    document.getElementById('stickerPanel').classList.remove('active');
+  }
+
+  // ===== ФАЙЛЫ =====
+  function uploadFile(input) {
+    if (!input.files || !input.files[0]) return;
+    if (!currentChatId) { alert('Сначала выбери чат'); input.value = ''; return; }
+
+    const file = input.files[0];
+    if (file.size > 50 * 1024 * 1024) { alert('Файл слишком большой (макс 50 МБ)'); input.value = ''; return; }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    document.getElementById('uploadingBox').classList.add('active');
+
+    fetch('/chats/' + currentChatId + '/upload', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('uploadingBox').classList.remove('active');
+        if (!data.ok) alert(data.error || 'Ошибка загрузки');
+      })
+      .catch(e => {
+        document.getElementById('uploadingBox').classList.remove('active');
+        alert('Ошибка загрузки');
+      });
+
+    input.value = '';
+  }
+
+  function formatSize(bytes) {
+    if (!bytes) return '0 Б';
+    if (bytes < 1024) return bytes + ' Б';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+    return (bytes / 1024 / 1024).toFixed(2) + ' МБ';
+  }
+
+  function fileIcon(mime, name) {
+    if (mime && mime.startsWith('image/')) return '🖼';
+    if (mime && mime.startsWith('video/')) return '🎥';
+    if (mime && mime.startsWith('audio/')) return '🎵';
+    if (mime && mime.includes('pdf')) return '📕';
+    if (mime && (mime.includes('zip') || mime.includes('rar'))) return '🗜';
+    if (name && (name.endsWith('.doc') || name.endsWith('.docx'))) return '📘';
+    if (name && (name.endsWith('.xls') || name.endsWith('.xlsx'))) return '📗';
+    if (name && name.endsWith('.txt')) return '📄';
+    return '📎';
+  }
+
+  function openImageViewer(url) {
+    document.getElementById('imageViewerImg').src = url;
+    document.getElementById('imageViewer').classList.add('active');
+  }
+
+  function closeImageViewer() {
+    document.getElementById('imageViewer').classList.remove('active');
+  }
+
+  // ===== АВАТАРКИ =====
+  function openAvatarUpload() {
+    if (currentProfileId === me.id) document.getElementById('avatarInput').click();
+  }
+
+  async function uploadAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    const formData = new FormData();
+    formData.append('avatar', input.files[0]);
+
+    try {
+      const res = await fetch('/avatar/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.ok) {
+        me.avatar = data.avatar;
+        openMyProfile();
+        await loadChats();
+        await loadStories();
+      } else {
+        alert(data.error || 'Ошибка загрузки');
+      }
+    } catch(e) { alert('Ошибка загрузки'); }
+    input.value = '';
+  }
+
+  async function deleteAvatar() {
+    if (!confirm('Удалить аватарку?')) return;
+    const res = await fetch('/avatar', { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      me.avatar = '';
+      openMyProfile();
+      await loadChats();
+      await loadStories();
+    }
+  }
+
+  // ===== УДАЛЕНИЕ =====
+  function openMsgAction(msgId, isMine) {
+    currentMsgToDelete = msgId;
+    const btn = document.getElementById('deleteForAllBtn');
+    const canDeleteAll = isMine || me.role === 'creator';
+    btn.style.display = canDeleteAll ? 'block' : 'none';
+    document.getElementById('msgActionModal').classList.add('active');
+  }
+
+  async function deleteMsgForMe() {
+    if (!currentMsgToDelete) return;
+    try {
+      const res = await fetch('/messages/' + currentMsgToDelete + '/delete-for-me', { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        const el = document.getElementById('msg_' + currentMsgToDelete);
+        if (el) el.remove();
+        closeModal('msgActionModal');
+      }
+    } catch(e) { alert('Ошибка'); }
+  }
+
+  async function deleteMsgForAll() {
+    if (!currentMsgToDelete) return;
+    if (!confirm('Удалить у всех? Это навсегда.')) return;
+    try {
+      const res = await fetch('/messages/' + currentMsgToDelete + '/delete-for-all', { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        const el = document.getElementById('msg_' + currentMsgToDelete);
+        if (el) el.remove();
+        closeModal('msgActionModal');
+      }
+    } catch(e) { alert('Ошибка'); }
+  }
+
+  // ===== ИСТОРИИ =====
+  async function loadStories() {
+    const res = await fetch('/stories');
+    const data = await res.json();
+    if (!data.ok) return;
+    allStories = data.stories;
+    renderStories();
+  }
+
+  function renderStories() {
+    const bar = document.getElementById('storiesBar');
+    bar.innerHTML = '';
+
+    const myGroup = allStories.find(g => g.userId === me.id);
+    const addDiv = document.createElement('div');
+    addDiv.className = 'story-circle';
+    addDiv.onclick = () => {
+      if (myGroup) openStoryViewer(allStories.indexOf(myGroup), 0);
+      else openUploadStory();
+    };
+
+    let myInner = '➕';
+    if (myGroup && myGroup.stories.length > 0) {
+      const firstStory = myGroup.stories[0];
+      myInner = firstStory.type === 'photo' ? `<img src="${firstStory.fileUrl}">` : '🎥';
+    } else if (me.avatar) {
+      myInner = `<img src="${me.avatar}">`;
+    }
+
+    addDiv.innerHTML = `
+      <div class="story-ring add">
+        <div class="story-inner">${myInner}</div>
+      </div>
+      <div class="story-name">Моя</div>
+    `;
+    bar.appendChild(addDiv);
+
+    allStories.forEach((group, idx) => {
+      if (group.userId === me.id) return;
+      const firstStory = group.stories[0];
+      const hasUnviewed = group.stories.some(s => !s.viewed);
+      const ringClass = hasUnviewed ? 'unviewed' : 'viewed';
+      const inner = firstStory.type === 'photo' ? `<img src="${firstStory.fileUrl}">` : '🎥';
+
+      const div = document.createElement('div');
+      div.className = 'story-circle';
+      div.onclick = () => openStoryViewer(idx, 0);
+      div.innerHTML = `
+        <div class="story-ring ${ringClass}">
+          <div class="story-inner">${inner}</div>
+        </div>
+        <div class="story-name">${escapeHtml(group.userName)}</div>
+      `;
+      bar.appendChild(div);
+    });
+  }
+
+  function openUploadStory() {
+    document.getElementById('storyFile').value = '';
+    document.getElementById('storyCaption').value = '';
+    document.getElementById('storyPreviewBox').innerHTML = '';
+    document.getElementById('uploadError').textContent = '';
+    document.getElementById('uploadStoryModal').classList.add('active');
+  }
+
+  function previewStory(input) {
+    const box = document.getElementById('storyPreviewBox');
+    box.innerHTML = '';
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const url = URL.createObjectURL(file);
+    if (file.type.startsWith('video')) {
+      box.innerHTML = `<video class="upload-preview" src="${url}" controls></video>`;
+    } else {
+      box.innerHTML = `<img class="upload-preview" src="${url}">`;
+    }
+  }
+
+  async function uploadStory() {
+    const fileInput = document.getElementById('storyFile');
+    const caption = document.getElementById('storyCaption').value.trim();
+    const error = document.getElementById('uploadError');
+
+    if (!fileInput.files || !fileInput.files[0]) { error.textContent = 'Выбери файл'; return; }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('caption', caption);
+
+    try {
+      const res = await fetch('/stories/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.ok) {
+        closeModal('uploadStoryModal');
+        await loadStories();
+      } else {
+        error.textContent = data.error || 'Ошибка';
+      }
+    } catch(e) { error.textContent = 'Ошибка загрузки'; }
+  }
+
+  function openStoryViewer(groupIdx, storyIdx) {
+    if (groupIdx < 0 || groupIdx >= allStories.length) return;
+    currentStoryGroup = groupIdx;
+    currentStoryIndex = storyIdx;
+    document.getElementById('storyViewer').classList.add('active');
+    renderStoryProgress();
+    showStory();
+  }
+
+  function renderStoryProgress() {
+    const group = allStories[currentStoryGroup];
+    const box = document.getElementById('storyProgress');
+    box.innerHTML = '';
+    group.stories.forEach((s, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'story-progress-bar';
+      const fill = document.createElement('div');
+      fill.className = 'story-progress-fill';
+      fill.id = 'progress_' + i;
+      if (i < currentStoryIndex) fill.style.width = '100%';
+      bar.appendChild(fill);
+      box.appendChild(bar);
+    });
+  }
+
+  function showStory() {
+    clearTimeout(storyTimer);
+    clearInterval(storyProgressInterval);
+
+    const group = allStories[currentStoryGroup];
+    if (!group) { closeStoryViewer(); return; }
+    const story = group.stories[currentStoryIndex];
+    if (!story) {
+      if (currentStoryGroup + 1 < allStories.length) openStoryViewer(currentStoryGroup + 1, 0);
+      else closeStoryViewer();
+      return;
+    }
+
+    const avatarEl = document.getElementById('storyAuthorAvatar');
+    if (group.userAvatar) avatarEl.innerHTML = `<img src="${group.userAvatar}">`;
+    else avatarEl.textContent = group.userName[0] ? group.userName[0].toUpperCase() : '?';
+    avatarEl.className = 'story-author-avatar' + (group.userRole === 'creator' ? ' creator' : '');
+
+    const nameEl = document.getElementById('storyAuthorName');
+    nameEl.textContent = group.userName;
+    nameEl.className = 'story-author-name' + (group.userRole === 'creator' ? ' creator' : '');
+    document.getElementById('storyTime').textContent = timeAgo(story.createdAt);
+
+    const content = document.getElementById('storyContent');
+    content.innerHTML = story.type === 'photo'
+      ? `<img src="${story.fileUrl}">`
+      : `<video src="${story.fileUrl}" autoplay playsinline></video>`;
+
+    const cap = document.getElementById('storyCaption2');
+    if (story.caption) {
+      cap.textContent = story.caption;
+      cap.style.display = 'block';
+    } else cap.style.display = 'none';
+
+    if (group.userId === me.id) {
+      document.getElementById('storyFooter').innerHTML = `👁 <a href="#" onclick="showViewers(${story.id}); return false;" style="color:#ffd700;">${story.views} просмотров</a>`;
+      document.getElementById('storyDeleteBtn').style.display = 'block';
+    } else {
+      document.getElementById('storyFooter').textContent = '';
+      document.getElementById('storyDeleteBtn').style.display = 'none';
+      if (!story.viewed) {
+        fetch('/stories/' + story.id + '/view', { method: 'POST' });
+        story.viewed = true;
+      }
+    }
+
+    const fill = document.getElementById('progress_' + currentStoryIndex);
+    if (fill) {
+      fill.style.width = '0%';
+      let progress = 0;
+      const duration = story.type === 'video' ? 15000 : 5000;
+      const step = 100 / (duration / 100);
+      storyProgressInterval = setInterval(() => {
+        progress += step;
+        if (progress >= 100) { clearInterval(storyProgressInterval); nextStory(); }
+        else fill.style.width = progress + '%';
+      }, 100);
+    }
+  }
+
+  function nextStory() {
+    clearTimeout(storyTimer);
+    clearInterval(storyProgressInterval);
+    const group = allStories[currentStoryGroup];
+    if (currentStoryIndex + 1 < group.stories.length) {
+      currentStoryIndex++;
+      renderStoryProgress();
+      showStory();
+    } else {
+      if (currentStoryGroup + 1 < allStories.length) {
+        currentStoryGroup++;
+        currentStoryIndex = 0;
+        renderStoryProgress();
+        showStory();
+      } else closeStoryViewer();
+    }
+  }
+
+  function prevStory() {
+    clearTimeout(storyTimer);
+    clearInterval(storyProgressInterval);
+    if (currentStoryIndex > 0) {
+      currentStoryIndex--;
+      renderStoryProgress();
+      showStory();
+    } else if (currentStoryGroup > 0) {
+      currentStoryGroup--;
+      currentStoryIndex = 0;
+      renderStoryProgress();
+      showStory();
+    }
+  }
+
+  function closeStoryViewer() {
+    clearTimeout(storyTimer);
+    clearInterval(storyProgressInterval);
+    document.getElementById('storyViewer').classList.remove('active');
+    loadStories();
+  }
+
+  async function deleteCurrentStory() {
+    const group = allStories[currentStoryGroup];
+    const story = group.stories[currentStoryIndex];
+    if (!confirm('Удалить эту историю?')) return;
+    const res = await fetch('/stories/' + story.id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) { closeStoryViewer(); await loadStories(); }
+  }
+
+  async function showViewers(storyId) {
+    const res = await fetch('/stories/' + storyId + '/viewers');
+    const data = await res.json();
+    if (!data.ok) return;
+    const box = document.getElementById('viewersList');
+    box.innerHTML = '';
+    if (data.viewers.length === 0) {
+      box.innerHTML = '<p style="color:#8696a0;">Пока никто не смотрел</p>';
+    } else {
+      data.viewers.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'viewer-item';
+        const av = v.avatar
+          ? `<div class="viewer-avatar ${v.role === 'creator' ? 'creator' : ''}"><img src="${v.avatar}"></div>`
+          : `<div class="viewer-avatar ${v.role === 'creator' ? 'creator' : ''}">${v.name[0] ? v.name[0].toUpperCase() : '?'}</div>`;
+        div.innerHTML = `
+          ${av}
+          <div style="flex:1;">
+            <div class="vname ${v.role === 'creator' ? 'creator' : ''}">${escapeHtml(v.name)}</div>
+            <div class="vtime">${timeAgo(v.viewed_at)}</div>
+          </div>
+        `;
+        box.appendChild(div);
+      });
+    }
+    document.getElementById('viewersModal').classList.add('active');
+  }
+
+  function timeAgo(str) {
+    if (!str) return '';
+    const d = new Date(str.includes('T') ? str : str.replace(' ', 'T') + 'Z');
+    const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (diff < 60) return 'только что';
+    if (diff < 3600) return Math.floor(diff / 60) + ' мин назад';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' ч назад';
+    return Math.floor(diff / 86400) + ' дн назад';
+  }
+
+  // ===== ЧАТЫ =====
+  async function loadChats() {
+    const res = await fetch('/chats');
+    const data = await res.json();
+    const box = document.getElementById('chatsList');
+    box.innerHTML = '';
+
+    if (!data.ok || data.chats.length === 0) {
+      box.innerHTML = '<div class="empty-chats">Нет чатов.<br>Создай первый!</div>';
+      return;
+    }
+
+    data.chats.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'chat-item' + (c.id === currentChatId ? ' active' : '');
+      div.onclick = () => openChat(c.id, c.title, c.role, c.status, c.otherId, c.avatar, c.type);
+      const letter = c.title[0] ? c.title[0].toUpperCase() : '?';
+      const statusHtml = c.status ? `<div class="chat-status">${escapeHtml(c.status)}</div>` : '';
+
+      let avatarContent;
+      if (c.type === 'saved') avatarContent = '💾';
+      else if (c.avatar) avatarContent = `<img src="${c.avatar}">`;
+      else if (c.type === 'group') avatarContent = '👥';
+      else avatarContent = letter;
+
+      let avatarClass = 'chat-avatar';
+      if (c.type === 'group' || c.type === 'saved') avatarClass += ' group';
+      if (c.role === 'creator' && !c.avatar && c.type !== 'saved') avatarClass += ' creator';
+
+      div.innerHTML = `
+        <div class="${avatarClass}">${avatarContent}</div>
+        <div class="chat-info">
+          <div class="chat-title ${c.role === 'creator' && c.type !== 'saved' ? 'creator' : ''}">${escapeHtml(c.title)}</div>
+          ${statusHtml}
+          <div class="chat-subtitle">${c.type === 'saved' ? 'Заметки для себя' : c.type === 'group' ? 'Группа' : 'Личный чат'}</div>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  }
+
+  async function openChat(chatId, title, role, status, otherId, avatar, type) {
+    currentChatId = chatId;
+    currentChatData = { title, role, otherId, type };
+    socket.emit('join_chat', chatId);
+
+    const header = document.getElementById('mainHeader');
+    header.style.display = 'flex';
+    header.className = 'main-header' + (role === 'creator' && type !== 'saved' ? ' creator' : '');
+
+    let headerAvatar = '';
+    if (type === 'saved') headerAvatar = '<div class="chat-avatar group" style="width:32px;height:32px;">💾</div>';
+    else if (avatar) headerAvatar = `<div class="chat-avatar" style="width:32px;height:32px;"><img src="${avatar}"></div>`;
+
+    header.innerHTML = `${headerAvatar}<div>${escapeHtml(title)}${status ? '<div class="msub">' + escapeHtml(status) + '</div>' : ''}</div>`;
+
+    document.getElementById('messages').style.display = 'flex';
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('emptyMain').style.display = 'none';
+    document.getElementById('inputArea').style.display = 'flex';
+
+    const res = await fetch('/chats/' + chatId + '/messages');
+    const data = await res.json();
+    if (data.ok) {
+      data.messages.forEach(m => {
+        addMessage({
+          id: m.id, chatId, userId: m.user_id, name: m.name, text: m.text,
+          time: formatTime(m.created_at), role: m.role, status: m.status, avatar: m.avatar,
+          msgType: m.msg_type, fileUrl: m.file_url, fileName: m.file_name,
+          fileSize: m.file_size, fileMime: m.file_mime
+        });
+      });
+    }
+    await loadChats();
+  }
+
+  function addMessage(m) {
+    const box = document.getElementById('messages');
+    const div = document.createElement('div');
+    const isMine = m.name === me.name;
+    div.className = 'msg' + (isMine ? ' mine' : '');
+    div.id = 'msg_' + m.id;
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'msg-del-btn';
+    delBtn.textContent = '🗑';
+    delBtn.onclick = (e) => { e.stopPropagation(); openMsgAction(m.id, isMine); };
+    div.appendChild(delBtn);
+
+    if (!isMine) {
+      let avHtml;
+      if (m.avatar) avHtml = `<div class="msg-avatar ${m.role === 'creator' ? 'creator' : ''}"><img src="${m.avatar}"></div>`;
+      else avHtml = `<div class="msg-avatar ${m.role === 'creator' ? 'creator' : ''}">${m.name[0] ? m.name[0].toUpperCase() : '?'}</div>`;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = avHtml;
+      div.appendChild(tmp.firstChild);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'msg-body';
+
+    if (!isMine) {
+      const n = document.createElement('div');
+      n.className = 'name' + (m.role === 'creator' ? ' creator' : '');
+      n.textContent = m.name;
+      body.appendChild(n);
+    }
+    if (m.status && !isMine) {
+      const s = document.createElement('div');
+      s.className = 'msg-status';
+      s.textContent = m.status;
+      body.appendChild(s);
+    }
+
+    const type = m.msgType || 'text';
+
+    if (type === 'image' && m.fileUrl) {
+      const img = document.createElement('img');
+      img.className = 'msg-image';
+      img.src = m.fileUrl;
+      img.loading = 'lazy';
+      img.onclick = () => openImageViewer(m.fileUrl);
+      body.appendChild(img);
+    } else if (type === 'video' && m.fileUrl) {
+      const video = document.createElement('video');
+      video.className = 'msg-video';
+      video.src = m.fileUrl;
+      video.controls = true;
+      video.preload = 'metadata';
+      body.appendChild(video);
+    } else if (type === 'audio' && m.fileUrl) {
+      const audio = document.createElement('audio');
+      audio.className = 'msg-audio';
+      audio.src = m.fileUrl;
+      audio.controls = true;
+      body.appendChild(audio);
+    } else if (type === 'sticker' && m.fileUrl) {
+      const img = document.createElement('img');
+      img.className = 'msg-sticker';
+      img.src = m.fileUrl;
+      body.appendChild(img);
+    } else if (type === 'file' && m.fileUrl) {
+      const link = document.createElement('a');
+      link.className = 'msg-file';
+      link.href = m.fileUrl;
+      link.download = m.fileName || 'file';
+      link.target = '_blank';
+      link.innerHTML = `
+        <div class="ficon">${fileIcon(m.fileMime || '', m.fileName || '')}</div>
+        <div class="finfo">
+          <div class="fname">${escapeHtml(m.fileName || 'Файл')}</div>
+          <div class="fsize">${formatSize(m.fileSize || 0)}</div>
+        </div>
+      `;
+      body.appendChild(link);
+    } else {
+      body.appendChild(document.createTextNode(m.text || ''));
+    }
+
+    const t = document.createElement('span');
+    t.className = 'time';
+    t.textContent = m.time;
+    body.appendChild(t);
+
+    div.appendChild(body);
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function formatTime(str) {
+    if (!str) return '';
+    const d = new Date(str.includes('T') ? str : str.replace(' ', 'T') + 'Z');
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function send() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !currentChatId) return;
+    socket.emit('message', { chatId: currentChatId, text });
+    input.value = '';
+    input.focus();
+  }
+
+  function openMyProfile() {
+    currentProfileId = me.id;
+    const avEl = document.getElementById('profileAvatar');
+    if (me.avatar) avEl.innerHTML = `<img src="${me.avatar}">`;
+    else avEl.textContent = me.name[0] ? me.name[0].toUpperCase() : '?';
+    avEl.className = 'profile-avatar' + (me.role === 'creator' ? ' creator' : '');
+    avEl.style.cursor = 'pointer';
+
+    document.getElementById('profileName').textContent = me.name;
+    document.getElementById('profileName').className = 'profile-name' + (me.role === 'creator' ? ' creator' : '');
+    const st = document.getElementById('profileStatus');
+    st.textContent = me.status || 'Статус не установлен';
+    st.className = 'profile-status' + (me.status ? '' : ' empty');
+
+    document.getElementById('profileActions').innerHTML = `
+      <button class="primary" onclick="closeModal('profileModal'); openStatusModal()">📊 Выбрать статус</button>
+      ${me.avatar ? `<button class="cancel" onclick="deleteAvatar()">🗑 Удалить фото</button>` : ''}
+    `;
+    document.getElementById('profileModal').classList.add('active');
+  }
+
+  async function openUserProfile(userId) {
+    currentProfileId = userId;
+    const res = await fetch('/user/' + userId);
+    const data = await res.json();
+    if (!data.ok) return;
+    const u = data.user;
+
+    const avEl = document.getElementById('profileAvatar');
+    if (u.avatar) avEl.innerHTML = `<img src="${u.avatar}">`;
+    else avEl.textContent = u.name[0] ? u.name[0].toUpperCase() : '?';
+    avEl.className = 'profile-avatar' + (u.role === 'creator' ? ' creator' : '');
+    avEl.style.cursor = 'default';
+
+    document.getElementById('profileName').textContent = u.name;
+    document.getElementById('profileName').className = 'profile-name' + (u.role === 'creator' ? ' creator' : '');
+    const st = document.getElementById('profileStatus');
+    st.textContent = u.status || 'Статус не установлен';
+    st.className = 'profile-status' + (u.status ? '' : ' empty');
+
+    document.getElementById('profileActions').innerHTML = `
+      <button class="primary" onclick="closeModal('profileModal'); startChatWith(${u.id}, '${escapeHtml(u.name)}', '${u.role}')">💬 Написать</button>
+    `;
+    document.getElementById('profileModal').classList.add('active');
+  }
+
+  function openCurrentProfile() {
+    if (currentChatData && currentChatData.otherId) openUserProfile(currentChatData.otherId);
+  }
+
+  async function startChatWith(userId, name, role) {
+    const res = await fetch('/chats/private', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      socket.emit('join_chat', data.chatId);
+      await loadChats();
+      openChat(data.chatId, name, role, '', userId, '', 'private');
+    }
+  }
+
+  function openPrivateModal() {
+    document.getElementById('searchPhone').value = '';
+    document.getElementById('searchResult').innerHTML = '';
+    document.getElementById('privateModal').classList.add('active');
+  }
+
+  async function searchUser() {
+    const phone = document.getElementById('searchPhone').value.trim();
+    if (!phone) return;
+    const res = await fetch('/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    const box = document.getElementById('searchResult');
+
+    if (!data.ok) {
+      box.innerHTML = `<div class="search-result" style="color:#ff6b6b;">${data.error || 'Не найдено'}</div>`;
+      return;
+    }
+    const u = data.user;
+    const avHtml = u.avatar
+      ? `<div class="search-avatar ${u.role === 'creator' ? 'creator' : ''}"><img src="${u.avatar}"></div>`
+      : `<div class="search-avatar ${u.role === 'creator' ? 'creator' : ''}">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+    box.innerHTML = `
+      <div class="search-result">
+        ${avHtml}
+        <div class="search-info">
+          <div class="sname ${u.role === 'creator' ? 'creator' : ''}">${escapeHtml(u.name)}</div>
+          ${u.status ? `<div class="sstatus">${escapeHtml(u.status)}</div>` : ''}
+          <div style="margin-top:8px;">
+            <button style="padding:6px 12px;background:#ff6b00;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:12px;" onclick="createPrivateChat(${u.id}, '${escapeHtml(u.name)}', '${u.role}')">💬 Написать</button>
+            <button style="margin-left:5px;padding:6px 12px;background:#2a3942;color:#e9edef;border:none;border-radius:6px;cursor:pointer;font-size:12px;" onclick="closeModal('privateModal'); openUserProfile(${u.id})">👤 Профиль</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function createPrivateChat(userId, name, role) {
+    const res = await fetch('/chats/private', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('privateModal');
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, role, '', userId, '', 'private');
+    }
+  }
+
+  function openGroupModal() {
+    document.getElementById('groupName').value = '';
+    document.getElementById('groupPhone').value = '';
+    document.getElementById('groupMembers').innerHTML = '';
+    groupMembersList = [];
+    document.getElementById('groupModal').classList.add('active');
+  }
+
+  async function addGroupUser() {
+    const phone = document.getElementById('groupPhone').value.trim();
+    if (!phone) return;
+    const res = await fetch('/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    if (!data.ok) { alert('Пользователь не найден'); return; }
+    if (groupMembersList.find(u => u.id === data.user.id)) { alert('Уже добавлен'); return; }
+    groupMembersList.push(data.user);
+    document.getElementById('groupPhone').value = '';
+    renderGroupMembers();
+  }
+
+  function renderGroupMembers() {
+    const box = document.getElementById('groupMembers');
+    box.innerHTML = '<p style="color:#8696a0;font-size:12px;margin-bottom:5px;">Участники:</p>';
+    groupMembersList.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      div.style.padding = '8px';
+      const avHtml = u.avatar
+        ? `<div class="search-avatar ${u.role === 'creator' ? 'creator' : ''}" style="width:32px;height:32px;font-size:14px;"><img src="${u.avatar}"></div>`
+        : `<div class="search-avatar ${u.role === 'creator' ? 'creator' : ''}" style="width:32px;height:32px;font-size:14px;">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+      div.innerHTML = `${avHtml}<span class="${u.role === 'creator' ? 'sname creator' : ''}" style="font-size:14px;">${escapeHtml(u.name)}</span>`;
+      box.appendChild(div);
+    });
+  }
+
+  async function createGroup() {
+    const name = document.getElementById('groupName').value.trim();
+    if (!name) { alert('Введи название'); return; }
+    if (groupMembersList.length === 0) { alert('Добавь участника'); return; }
+
+    const res = await fetch('/chats/group', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, userIds: groupMembersList.map(u => u.id) })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('groupModal');
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, 'group', '', null, '', 'group');
+    }
+  }
+
+  function openDeleteAccount() {
+    document.getElementById('deleteAccountModal').classList.add('active');
+  }
+
+  async function deleteAccount() {
+    const res = await fetch('/delete-account', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) window.location.href = '/';
+  }
+
+  function openAdminLogin() {
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminError').textContent = '';
+    document.getElementById('adminLoginModal').classList.add('active');
+  }
+
+  async function checkAdminPassword() {
+    const password = document.getElementById('adminPassword').value;
+    const res = await fetch('/admin/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('adminLoginModal');
+      openAdminPanel();
+    } else {
+      document.getElementById('adminError').textContent = data.error || 'Неверный пароль';
+    }
+  }
+
+  async function openAdminPanel() {
+    const res = await fetch('/admin/users');
+    const data = await res.json();
+    if (!data.ok) { alert('Нет доступа'); return; }
+
+    document.getElementById('adminStats').innerHTML = `
+      <div class="admin-stat"><div class="num">${data.stats.users}</div><div class="lbl">Юзеров</div></div>
+      <div class="admin-stat"><div class="num">${data.stats.chats}</div><div class="lbl">Чатов</div></div>
+      <div class="admin-stat"><div class="num">${data.stats.messages}</div><div class="lbl">Сообщений</div></div>
+      <div class="admin-stat"><div class="num">${data.stats.stories || 0}</div><div class="lbl">Историй</div></div>
+    `;
+
+    const box = document.getElementById('adminUsers');
+    box.innerHTML = '';
+    data.users.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'admin-user';
+      const isBanned = u.banned ? true : false;
+      const isMe = u.id === me.id;
+      const avHtml = u.avatar
+        ? `<div class="admin-avatar ${u.role === 'creator' ? 'creator' : ''}"><img src="${u.avatar}"></div>`
+        : `<div class="admin-avatar ${u.role === 'creator' ? 'creator' : ''}">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+      const created = u.created_at ? new Date(u.created_at).toLocaleString('ru-RU') : '—';
+      div.innerHTML = `
+        ${avHtml}
+        <div class="info">
+          <div class="uname ${u.role === 'creator' ? 'creator' : ''}">${escapeHtml(u.name)}${isMe ? ' (это ты)' : ''}</div>
+          <div class="uphone">📱 ${escapeHtml(u.phone)} ${isBanned ? '<span class="banned-tag">🚫 ЗАБАНЕН</span>' : ''}</div>
+          <div class="ucreated">📅 ${created}</div>
+          ${u.status ? `<div class="ustatus">🔥 ${escapeHtml(u.status)}</div>` : ''}
+        </div>
+        ${!isMe ? `<button class="${isBanned ? 'unban-btn' : 'ban-btn'}" onclick="toggleBan(${u.id}, ${isBanned ? 1 : 0})">${isBanned ? '✅ Разбанить' : '🚫 Забанить'}</button>` : ''}
+      `;
+      box.appendChild(div);
+    });
+
+    document.getElementById('adminPanel').classList.add('active');
+  }
+
+  async function toggleBan(userId, currentlyBanned) {
+    const res = await fetch('/admin/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, banned: !currentlyBanned })
+    });
+    const data = await res.json();
+    if (data.ok) openAdminPanel();
+    else alert(data.error);
+  }
+
+  function showAdminTab(tab, btn) {
+    document.querySelectorAll('.admin-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('adminUsers').style.display = tab === 'users' ? 'block' : 'none';
+    document.getElementById('adminChats').style.display = tab === 'chats' ? 'block' : 'none';
+    document.getElementById('adminStories').style.display = tab === 'stories' ? 'block' : 'none';
+    document.getElementById('adminStatuses').style.display = tab === 'statuses' ? 'block' : 'none';
+
+    if (tab === 'chats') loadAdminChats();
+    if (tab === 'stories') loadAdminStories();
+    if (tab === 'statuses') loadAdminStatuses();
+  }
+
+  // ===== АДМИН-СТАТУСЫ =====
+  async function loadAdminStatuses() {
+    const res = await fetch('/admin/statuses');
+    const data = await res.json();
+    if (!data.ok) return;
+    availableStatuses = data.statuses;
+
+    const box = document.getElementById('adminStatuses');
+    box.innerHTML = `
+      <div class="status-create">
+        <input type="text" class="emoji-input" id="newStatusEmoji" placeholder="😀" maxlength="4">
+        <input type="text" id="newStatusText" placeholder="Название статуса" maxlength="50">
+        <button onclick="createStatus()">+ Создать</button>
+      </div>
+      <h4 style="color:#ff6b00;margin-bottom:10px;font-size:14px;">Существующие статусы:</h4>
+      <div id="statusesList"></div>
+      <div class="give-status-box">
+        <h4>🎁 Выдать статус пользователю</h4>
+        <select id="giveUserId"></select>
+        <select id="giveStatusId"></select>
+        <button onclick="giveStatus()">✅ Выдать</button>
+      </div>
+    `;
+
+    const list = document.getElementById('statusesList');
+    data.statuses.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'status-item';
+      div.innerHTML = `
+        <span class="semoji">${s.emoji || ''}</span>
+        <span class="stext">${escapeHtml(s.text)}</span>
+        <button onclick="deleteStatus(${s.id})">🗑</button>
+      `;
+      list.appendChild(div);
+    });
+
+    // Заполняем select юзеров
+    const usersRes = await fetch('/admin/users');
+    const usersData = await usersRes.json();
+    const userSelect = document.getElementById('giveUserId');
+    userSelect.innerHTML = '<option value="">-- Выбери юзера --</option>';
+    if (usersData.ok) {
+      usersData.users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.name} (${u.phone})`;
+        userSelect.appendChild(opt);
+      });
+    }
+
+    // Заполняем select статусов
+    const statusSelect = document.getElementById('giveStatusId');
+    statusSelect.innerHTML = '<option value="">-- Выбери статус --</option>';
+    data.statuses.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.emoji ? `${s.emoji} ${s.text}` : s.text;
+      opt.textContent = s.emoji ? `${s.emoji} ${s.text}` : s.text;
+      statusSelect.appendChild(opt);
+    });
+  }
+
+  async function createStatus() {
+    const emoji = document.getElementById('newStatusEmoji').value.trim();
+    const text = document.getElementById('newStatusText').value.trim();
+    if (!text) { alert('Введи текст'); return; }
+
+    const res = await fetch('/admin/statuses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emoji, text })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      await loadAdminStatuses();
+      await loadStatuses();
+    } else alert(data.error);
+  }
+
+  async function deleteStatus(id) {
+    if (!confirm('Удалить статус?')) return;
+    const res = await fetch('/admin/statuses/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      await loadAdminStatuses();
+      await loadStatuses();
+    }
+  }
+
+  async function giveStatus() {
+    const userId = document.getElementById('giveUserId').value;
+    const status = document.getElementById('giveStatusId').value;
+    if (!userId || !status) { alert('Выбери юзера и статус'); return; }
+
+    const res = await fetch('/admin/give-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, status })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert('✅ Статус выдан!');
+    } else alert(data.error);
+  }
+
+  async function loadAdminChats() {
+    const res = await fetch('/admin/chats');
+    const data = await res.json();
+    if (!data.ok) return;
+    const box = document.getElementById('adminChats');
+    box.innerHTML = '<div class="admin-chats">';
+    if (data.chats.length === 0) {
+      box.innerHTML += '<p style="color:#8696a0;">Чатов нет</p>';
+    } else {
+      data.chats.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'admin-chat';
+        div.onclick = () => viewAdminChat(c.id, c.name || 'Личный чат');
+        div.innerHTML = `
+          <div class="cname">${c.type === 'group' ? '👥 ' : '👤 '}${escapeHtml(c.name || 'Личный чат')}</div>
+          <div class="cmembers">Участники: ${escapeHtml(c.members || '—')}</div>
+        `;
+        box.appendChild(div);
+      });
+    }
+    box.innerHTML += '</div>';
+  }
+
+  async function loadAdminStories() {
+    const res = await fetch('/admin/stories');
+    const data = await res.json();
+    if (!data.ok) return;
+    const box = document.getElementById('adminStories');
+    box.innerHTML = '';
+    if (data.stories.length === 0) {
+      box.innerHTML = '<p style="color:#8696a0;">Историй нет</p>';
+    } else {
+      data.stories.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'admin-chat';
+        div.innerHTML = `
+          <div class="cname">${s.type === 'video' ? '🎥' : '📸'} ${escapeHtml(s.name)} ${s.role === 'creator' ? '👑' : ''}</div>
+          <div class="cmembers">${timeAgo(s.created_at)} • 👁 ${s.views} просмотров</div>
+        `;
+        box.appendChild(div);
+      });
+    }
+  }
+
+  async function viewAdminChat(chatId, title) {
+    const res = await fetch('/admin/chats/' + chatId);
+    const data = await res.json();
+    if (!data.ok) return;
+
+    document.getElementById('adminChatTitle').textContent = '💬 ' + title;
+    const box = document.getElementById('adminMessages');
+    box.innerHTML = '';
+    if (data.messages.length === 0) {
+      box.innerHTML = '<p style="color:#8696a0;">Сообщений нет</p>';
+    } else {
+      data.messages.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'amsg';
+        let content = '';
+        if (m.msg_type === 'image') content = '🖼 <i>Фото</i>';
+        else if (m.msg_type === 'video') content = '🎥 <i>Видео</i>';
+        else if (m.msg_type === 'audio') content = '🎵 <i>Аудио</i>';
+        else if (m.msg_type === 'sticker') content = '🎨 <i>Стикер</i>';
+        else if (m.msg_type === 'file') content = `📎 <i>${escapeHtml(m.file_name || 'Файл')}</i>`;
+        else content = escapeHtml(m.text);
+
+        div.innerHTML = `
+          <span class="aname ${m.role === 'creator' ? 'creator' : ''}">${escapeHtml(m.name)}</span>
+          <span class="atime">${formatTime(m.created_at)}</span>
+          <div style="margin-top:4px;">${content}</div>
+        `;
+        box.appendChild(div);
+      });
+    }
+    document.getElementById('adminChatView').classList.add('active');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  async function logout() {
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/';
+  }
+
+  document.getElementById('msgInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') send();
+  });
+  document.getElementById('searchPhone').addEventListener('keypress', e => {
+    if (e.key === 'Enter') searchUser();
+  });
+  document.getElementById('adminPassword').addEventListener('keypress', e => {
+    if (e.key === 'Enter') checkAdminPassword();
+  });
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeStoryViewer();
+      closeImageViewer();
+    }
+    if (e.key === 'ArrowRight') nextStory();
+    if (e.key === 'ArrowLeft') prevStory();
+  });
+
+  init();
+</script>
+</body>
+</html>

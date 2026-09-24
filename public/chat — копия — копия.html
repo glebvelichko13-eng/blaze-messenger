@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Чат</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+  body {
+    background: #0b141a; display: flex; justify-content: center;
+    align-items: center; height: 100vh;
+  }
+  .app {
+    width: 100%; max-width: 500px; height: 95vh;
+    background: #111b21; display: flex; flex-direction: column;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  }
+  .header {
+    background: #202c33; padding: 12px 15px;
+    color: #e9edef; font-size: 16px; font-weight: bold;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .online { font-size: 13px; color: #8696a0; font-weight: normal; }
+  .logout {
+    background: transparent; border: none; color: #8696a0;
+    cursor: pointer; font-size: 18px;
+  }
+  .logout:hover { color: #ff6b6b; }
+  .messages {
+    flex: 1; overflow-y: auto; padding: 15px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .msg {
+    max-width: 78%; padding: 7px 11px; border-radius: 10px;
+    background: #202c33; color: #e9edef; align-self: flex-start;
+    word-wrap: break-word; font-size: 15px; line-height: 1.35;
+  }
+  .msg.mine { background: #005c4b; align-self: flex-end; }
+  .msg .name {
+    font-size: 12px; color: #53bdeb; font-weight: bold;
+    margin-bottom: 3px;
+  }
+  .msg.mine .name { display: none; }
+  .msg .time {
+    font-size: 10px; color: #8696a0; float: right;
+    margin-left: 10px; margin-top: 5px;
+  }
+  .system {
+    text-align: center; font-size: 12px; color: #8696a0;
+    padding: 3px; font-style: italic;
+  }
+
+  .msg .name.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 2s linear infinite;
+    font-size: 13px;
+    text-shadow: 0 0 10px rgba(0,255,136,0.5);
+  }
+  .msg .name.creator::after {
+    content: ' 👑';
+    -webkit-text-fill-color: initial;
+  }
+  @keyframes shine {
+    to { background-position: 200% center; }
+  }
+
+  .input-area {
+    display: flex; padding: 10px; background: #202c33; gap: 8px;
+  }
+  .input-area input {
+    flex: 1; padding: 11px 15px; border: none; border-radius: 20px;
+    background: #2a3942; color: #e9edef; font-size: 15px; outline: none;
+  }
+  .input-area button {
+    padding: 0 20px; border: none; border-radius: 20px;
+    background: #00a884; color: white; cursor: pointer;
+    font-size: 18px; font-weight: bold;
+  }
+  .input-area button:hover { background: #06cf9c; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      💬 Мессенджер
+      <div class="online"><span id="online">0</span> онлайн</div>
+    </div>
+    <button class="logout" onclick="logout()" title="Выйти">⏻</button>
+  </div>
+  <div class="messages" id="messages"></div>
+  <div class="input-area">
+    <input id="msgInput" placeholder="Сообщение..." autocomplete="off">
+    <button onclick="send()">➤</button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let socket = null;
+  let myName = '';
+
+  async function init() {
+    const res = await fetch('/me');
+    const data = await res.json();
+
+    if (!data.ok) {
+      window.location.href = '/';
+      return;
+    }
+
+    myName = data.name;
+    const myRole = data.role;
+
+    const hist = await fetch('/history');
+    const messages = await hist.json();
+    messages.forEach(m => addMessage(m.name, m.text, m.created_at, m.name === myName, false));
+
+    socket = io({ query: { name: myName, role: myRole } });
+
+    socket.on('message', (data) => {
+      const isMine = data.name === myName;
+      addMessage(data.name, data.text, data.time, isMine, data.role === 'creator');
+    });
+
+    socket.on('system', (text) => {
+      const box = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = 'system';
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    });
+
+    socket.on('online', (count) => {
+      document.getElementById('online').textContent = count;
+    });
+  }
+
+  function addMessage(name, text, time, isMine, isCreator) {
+    const box = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg' + (isMine ? ' mine' : '');
+
+    if (!isMine) {
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'name' + (isCreator ? ' creator' : '');
+      nameDiv.textContent = name;
+      div.appendChild(nameDiv);
+    }
+
+    div.appendChild(document.createTextNode(text));
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'time';
+    timeSpan.textContent = time;
+    div.appendChild(timeSpan);
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function send() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !socket) return;
+    socket.emit('message', text);
+    input.value = '';
+    input.focus();
+  }
+
+  async function logout() {
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/';
+  }
+
+  document.getElementById('msgInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') send();
+  });
+
+  init();
+</script>
+</body>
+</html>

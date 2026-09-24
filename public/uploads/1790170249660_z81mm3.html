@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Blaze 🔥</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+  body { background: #0b141a; height: 100vh; display: flex; justify-content: center; align-items: center; }
+  .app {
+    width: 100%; max-width: 950px; height: 95vh;
+    background: #111b21; display: flex;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+  }
+
+  /* САЙДБАР */
+  .sidebar { width: 320px; background: #111b21; border-right: 1px solid #2a3942; display: flex; flex-direction: column; }
+  .sidebar-header {
+    background: #202c33; padding: 12px 15px;
+    color: #e9edef; font-weight: bold; font-size: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .blaze-logo {
+    background: linear-gradient(90deg, #ff6b00, #ffd700, #ff6b00);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+    font-size: 18px;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+  .sidebar-header .me { font-size: 12px; color: #8696a0; font-weight: normal; }
+  .header-btns { display: flex; gap: 5px; }
+  .header-btns button {
+    background: transparent; border: none; cursor: pointer;
+    font-size: 16px; padding: 4px 8px; border-radius: 5px;
+    color: #8696a0;
+  }
+  .header-btns button:hover { background: #2a3942; color: #fff; }
+  .admin-btn { color: #ffd700 !important; }
+  .admin-btn:hover { background: #ffd700 !important; color: #000 !important; }
+  .del-btn { color: #ff6b6b !important; }
+  .del-btn:hover { background: #ff6b6b !important; color: #fff !important; }
+
+  .chats-list { flex: 1; overflow-y: auto; }
+  .chat-item {
+    padding: 12px 15px; cursor: pointer;
+    border-bottom: 1px solid #1f2c33;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .chat-item:hover { background: #202c33; }
+  .chat-item.active { background: #2a3942; }
+  .chat-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #6a7175; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 16px; flex-shrink: 0;
+  }
+  .chat-avatar.group { background: #ff6b00; }
+  .chat-info { flex: 1; overflow: hidden; }
+  .chat-title {
+    color: #e9edef; font-size: 15px; font-weight: bold;
+    display: flex; align-items: center; gap: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chat-title.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .chat-title.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .chat-subtitle { color: #8696a0; font-size: 12px; }
+  .empty-chats { padding: 30px 15px; text-align: center; color: #8696a0; font-size: 14px; }
+
+  .create-btns { background: #202c33; padding: 8px; display: flex; gap: 6px; }
+  .create-btns button {
+    flex: 1; padding: 9px; border: none; border-radius: 8px;
+    background: #ff6b00; color: white; cursor: pointer;
+    font-size: 13px; font-weight: bold;
+  }
+  .create-btns button:hover { background: #ff8c33; }
+
+  /* ОСНОВНОЙ ЧАТ */
+  .main { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
+  .main-header {
+    background: #202c33; padding: 12px 18px;
+    color: #e9edef; font-size: 16px; font-weight: bold;
+    border-bottom: 1px solid #1f2c33;
+  }
+  .main-header.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .main-header.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
+  .msg {
+    max-width: 70%; padding: 7px 11px; border-radius: 10px;
+    background: #202c33; color: #e9edef; align-self: flex-start;
+    word-wrap: break-word; font-size: 15px;
+  }
+  .msg.mine { background: #7a2e00; align-self: flex-end; }
+  .msg .name { font-size: 12px; color: #53bdeb; font-weight: bold; margin-bottom: 3px; }
+  .msg .name.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .msg .name.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .msg.mine .name { display: none; }
+  .msg .time { font-size: 10px; color: #8696a0; float: right; margin-left: 8px; margin-top: 5px; }
+
+  .empty-main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    color: #8696a0; font-size: 15px; text-align: center; padding: 20px;
+  }
+
+  .input-area { display: flex; padding: 10px; background: #202c33; gap: 8px; }
+  .input-area input {
+    flex: 1; padding: 11px 15px; border: none; border-radius: 20px;
+    background: #2a3942; color: #e9edef; font-size: 15px; outline: none;
+  }
+  .input-area button {
+    padding: 0 20px; border: none; border-radius: 20px;
+    background: #ff6b00; color: white; cursor: pointer;
+    font-size: 18px; font-weight: bold;
+  }
+  .input-area button:hover { background: #ff8c33; }
+
+  /* МОДАЛКИ */
+  .modal {
+    display: none; position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75); z-index: 100;
+    justify-content: center; align-items: center;
+  }
+  .modal.active { display: flex; }
+  .modal-box {
+    background: #202c33; padding: 22px; border-radius: 12px;
+    width: 400px; max-height: 85vh; overflow-y: auto;
+    color: #e9edef;
+  }
+  .modal-box h3 { margin-bottom: 15px; color: #ff6b00; }
+  .modal-box input {
+    width: 100%; padding: 11px; margin-bottom: 12px;
+    background: #2a3942; border: none; border-radius: 8px;
+    color: #e9edef; font-size: 14px; outline: none;
+  }
+  .modal-box .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .modal-box .actions button {
+    flex: 1; padding: 11px; border: none; border-radius: 8px;
+    cursor: pointer; font-weight: bold; font-size: 14px;
+  }
+  .modal-box .actions .primary { background: #ff6b00; color: white; }
+  .modal-box .actions .cancel { background: #2a3942; color: #e9edef; }
+  .modal-box .actions .danger { background: #ff6b6b; color: white; }
+
+  .search-result {
+    background: #111b21; padding: 12px; border-radius: 8px;
+    margin-bottom: 10px; color: #e9edef; font-size: 14px;
+  }
+  .search-result .sname { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+  .search-result .sname.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .search-result .sname.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+
+  /* АДМИНКА */
+  .admin-box { width: 700px; }
+  .admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+  .admin-tabs button {
+    padding: 8px 15px; background: #2a3942; color: #8696a0;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .admin-tabs button.active { background: #ff6b00; color: white; }
+  .admin-stats { display: flex; gap: 10px; margin-bottom: 15px; }
+  .admin-stat { flex: 1; background: #111b21; padding: 12px; border-radius: 8px; text-align: center; }
+  .admin-stat .num { font-size: 24px; color: #ff6b00; font-weight: bold; }
+  .admin-stat .lbl { font-size: 12px; color: #8696a0; }
+
+  .admin-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; font-size: 14px;
+  }
+  .admin-user .info { flex: 1; }
+  .admin-user .info .uname {
+    font-weight: bold; display: flex; align-items: center; gap: 4px;
+  }
+  .admin-user .info .uname.creator {
+    background: linear-gradient(90deg, #00ff88, #ffd700, #00ff88);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+  .admin-user .info .uname.creator::after { content: ' 👑'; -webkit-text-fill-color: initial; }
+  .admin-user .info .uphone { color: #8696a0; font-size: 12px; }
+  .admin-user .info .banned-tag { color: #ff6b6b; font-size: 11px; margin-left: 5px; }
+  .admin-user button {
+    padding: 6px 12px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 12px; font-weight: bold;
+  }
+  .ban-btn { background: #ff6b6b; color: white; }
+  .unban-btn { background: #00a884; color: white; }
+
+  .admin-chats .admin-chat {
+    padding: 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; cursor: pointer; font-size: 13px;
+  }
+  .admin-chat:hover { background: #2a3942; }
+  .admin-chat .cname { font-weight: bold; margin-bottom: 3px; }
+  .admin-chat .cmembers { color: #8696a0; font-size: 12px; }
+
+  .admin-messages { max-height: 400px; overflow-y: auto; }
+  .admin-messages .amsg {
+    padding: 8px 10px; background: #111b21; border-radius: 8px;
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .admin-messages .amsg .aname { color: #53bdeb; font-weight: bold; font-size: 12px; }
+  .admin-messages .amsg .atime { color: #8696a0; font-size: 11px; float: right; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div>
+        <span class="blaze-logo">🔥 Blaze</span>
+        <div class="me" id="me">Загрузка...</div>
+      </div>
+      <div class="header-btns">
+        <button id="adminBtn" class="admin-btn" style="display:none;" onclick="openAdminLogin()" title="Админ-панель">👑</button>
+        <button class="del-btn" onclick="openDeleteAccount()" title="Удалить аккаунт">🗑</button>
+        <button onclick="logout()" title="Выйти">⏻</button>
+      </div>
+    </div>
+    <div class="chats-list" id="chatsList"></div>
+    <div class="create-btns">
+      <button onclick="openPrivateModal()">+ Личный</button>
+      <button onclick="openGroupModal()">+ Группа</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="mainHeader" class="main-header" style="display:none;"></div>
+    <div class="messages" id="messages" style="display:none;"></div>
+    <div class="empty-main" id="emptyMain">Выбери чат слева<br>или создай новый</div>
+    <div class="input-area" id="inputArea" style="display:none;">
+      <input id="msgInput" placeholder="Сообщение..." autocomplete="off">
+      <button onclick="send()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="privateModal">
+  <div class="modal-box">
+    <h3>🔍 Найти по номеру</h3>
+    <input id="searchPhone" placeholder="+79990000001">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('privateModal')">Отмена</button>
+      <button class="primary" onclick="searchUser()">Найти</button>
+    </div>
+    <div id="searchResult" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<div class="modal" id="groupModal">
+  <div class="modal-box">
+    <h3>👥 Новая группа</h3>
+    <input id="groupName" placeholder="Название группы">
+    <p style="color:#8696a0;font-size:12px;margin-bottom:8px;">Добавляй участников по номеру:</p>
+    <input id="groupPhone" placeholder="Номер телефона">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('groupModal')">Отмена</button>
+      <button class="primary" onclick="addGroupUser()">+ Добавить</button>
+    </div>
+    <div id="groupMembers" style="margin-top:10px;"></div>
+    <div class="actions">
+      <button class="primary" onclick="createGroup()">Создать группу</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="adminLoginModal">
+  <div class="modal-box">
+    <h3>🔐 Вход в админ-панель</h3>
+    <input id="adminPassword" type="password" placeholder="Пароль">
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('adminLoginModal')">Отмена</button>
+      <button class="primary" onclick="checkAdminPassword()">Войти</button>
+    </div>
+    <div id="adminError" style="color:#ff6b6b;font-size:13px;margin-top:10px;"></div>
+  </div>
+</div>
+
+<div class="modal" id="adminPanel">
+  <div class="modal-box admin-box">
+    <h3>👑 Админ-панель Blaze</h3>
+    <div class="admin-stats" id="adminStats"></div>
+    <div class="admin-tabs">
+      <button class="active" onclick="showAdminTab('users', this)">👥 Пользователи</button>
+      <button onclick="showAdminTab('chats', this)">💬 Чаты</button>
+    </div>
+    <div id="adminUsers"></div>
+    <div id="adminChats" style="display:none;"></div>
+    <div class="actions" style="margin-top:15px;">
+      <button class="cancel" onclick="closeModal('adminPanel')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="adminChatView">
+  <div class="modal-box admin-box">
+    <h3 id="adminChatTitle">💬 Просмотр чата</h3>
+    <div class="admin-messages" id="adminMessages"></div>
+    <div class="actions" style="margin-top:15px;">
+      <button class="cancel" onclick="closeModal('adminChatView')">Назад</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="deleteAccountModal">
+  <div class="modal-box">
+    <h3>🗑 Удалить аккаунт</h3>
+    <p style="color:#e9edef;font-size:14px;margin-bottom:15px;">
+      Ты уверен? Все чаты, сообщения и аккаунт будут <b>навсегда удалены</b>. Это нельзя отменить.
+    </p>
+    <div class="actions">
+      <button class="cancel" onclick="closeModal('deleteAccountModal')">Отмена</button>
+      <button class="danger" onclick="deleteAccount()">Удалить навсегда</button>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let socket = null;
+  let me = null;
+  let currentChatId = null;
+  let groupMembersList = [];
+
+  async function init() {
+    try {
+      const res = await fetch('/me');
+      const data = await res.json();
+      if (!data.ok) { window.location.href = '/'; return; }
+
+      me = data;
+      document.getElementById('me').textContent = me.name + (me.role === 'creator' ? ' 👑' : '');
+
+      if (me.role === 'creator') {
+        document.getElementById('adminBtn').style.display = 'block';
+      }
+
+      socket = io({ query: { userId: me.id, name: me.name, role: me.role } });
+      socket.on('message', (data) => {
+        if (data.chatId === currentChatId) {
+          addMessage(data.name, data.text, data.time, data.name === me.name, data.role === 'creator');
+        }
+      });
+
+      await loadChats();
+    } catch (e) {
+      console.error('Ошибка инициализации:', e);
+      document.getElementById('me').textContent = 'Ошибка загрузки';
+    }
+  }
+
+  async function loadChats() {
+    try {
+      const res = await fetch('/chats');
+      const data = await res.json();
+      const box = document.getElementById('chatsList');
+      box.innerHTML = '';
+
+      if (!data.ok || data.chats.length === 0) {
+        box.innerHTML = '<div class="empty-chats">Нет чатов.<br>Создай первый!</div>';
+        return;
+      }
+
+      data.chats.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'chat-item' + (c.id === currentChatId ? ' active' : '');
+        div.onclick = () => openChat(c.id, c.title, c.role);
+        const letter = c.title[0] ? c.title[0].toUpperCase() : '?';
+        div.innerHTML = `
+          <div class="chat-avatar ${c.type === 'group' ? 'group' : ''}">${c.type === 'group' ? '👥' : letter}</div>
+          <div class="chat-info">
+            <div class="chat-title ${c.role === 'creator' ? 'creator' : ''}">${escapeHtml(c.title)}</div>
+            <div class="chat-subtitle">${c.type === 'group' ? 'Группа' : 'Личный чат'}</div>
+          </div>
+        `;
+        box.appendChild(div);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки чатов:', e);
+    }
+  }
+
+  async function openChat(chatId, title, role) {
+    currentChatId = chatId;
+    socket.emit('join_chat', chatId);
+
+    document.getElementById('mainHeader').style.display = 'block';
+    document.getElementById('mainHeader').textContent = title;
+    document.getElementById('mainHeader').className = 'main-header' + (role === 'creator' ? ' creator' : '');
+
+    document.getElementById('messages').style.display = 'flex';
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('emptyMain').style.display = 'none';
+    document.getElementById('inputArea').style.display = 'flex';
+
+    const res = await fetch('/chats/' + chatId + '/messages');
+    const data = await res.json();
+    if (data.ok) {
+      data.messages.forEach(m => {
+        addMessage(m.name, m.text, formatTime(m.created_at), m.name === me.name, m.role === 'creator');
+      });
+    }
+    await loadChats();
+  }
+
+  function addMessage(name, text, time, isMine, isCreator) {
+    const box = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg' + (isMine ? ' mine' : '');
+
+    if (!isMine) {
+      const n = document.createElement('div');
+      n.className = 'name' + (isCreator ? ' creator' : '');
+      n.textContent = name;
+      div.appendChild(n);
+    }
+
+    div.appendChild(document.createTextNode(text));
+
+    const t = document.createElement('span');
+    t.className = 'time';
+    t.textContent = time;
+    div.appendChild(t);
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function formatTime(str) {
+    if (!str) return '';
+    const d = new Date(str.includes('T') ? str : str.replace(' ', 'T') + 'Z');
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function send() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !currentChatId) return;
+    socket.emit('message', { chatId: currentChatId, text });
+    input.value = '';
+    input.focus();
+  }
+
+  function openPrivateModal() {
+    document.getElementById('searchPhone').value = '';
+    document.getElementById('searchResult').innerHTML = '';
+    document.getElementById('privateModal').classList.add('active');
+  }
+
+  async function searchUser() {
+    const phone = document.getElementById('searchPhone').value.trim();
+    if (!phone) return;
+    const res = await fetch('/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    const box = document.getElementById('searchResult');
+
+    if (!data.ok) {
+      box.innerHTML = `<div class="search-result" style="color:#ff6b6b;">${data.error || 'Не найдено'}</div>`;
+      return;
+    }
+
+    const u = data.user;
+    box.innerHTML = `
+      <div class="search-result">
+        <div class="sname ${u.role === 'creator' ? 'creator' : ''}">${escapeHtml(u.name)}</div>
+        <button style="margin-top:8px;padding:8px 15px;background:#ff6b00;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;" onclick="createPrivateChat(${u.id}, '${escapeHtml(u.name)}', '${u.role}')">💬 Написать</button>
+      </div>
+    `;
+  }
+
+  async function createPrivateChat(userId, name, role) {
+    const res = await fetch('/chats/private', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('privateModal');
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, role);
+    }
+  }
+
+  function openGroupModal() {
+    document.getElementById('groupName').value = '';
+    document.getElementById('groupPhone').value = '';
+    document.getElementById('groupMembers').innerHTML = '';
+    groupMembersList = [];
+    document.getElementById('groupModal').classList.add('active');
+  }
+
+  async function addGroupUser() {
+    const phone = document.getElementById('groupPhone').value.trim();
+    if (!phone) return;
+    const res = await fetch('/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    if (!data.ok) { alert('Пользователь не найден'); return; }
+    if (groupMembersList.find(u => u.id === data.user.id)) { alert('Уже добавлен'); return; }
+    groupMembersList.push(data.user);
+    document.getElementById('groupPhone').value = '';
+    renderGroupMembers();
+  }
+
+  function renderGroupMembers() {
+    const box = document.getElementById('groupMembers');
+    box.innerHTML = '<p style="color:#8696a0;font-size:12px;margin-bottom:5px;">Участники:</p>';
+    groupMembersList.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      div.style.padding = '8px';
+      div.innerHTML = `<span class="${u.role === 'creator' ? 'sname creator' : ''}" style="font-size:14px;">${escapeHtml(u.name)}</span>`;
+      box.appendChild(div);
+    });
+  }
+
+  async function createGroup() {
+    const name = document.getElementById('groupName').value.trim();
+    if (!name) { alert('Введи название группы'); return; }
+    if (groupMembersList.length === 0) { alert('Добавь хотя бы одного участника'); return; }
+
+    const res = await fetch('/chats/group', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, userIds: groupMembersList.map(u => u.id) })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('groupModal');
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, 'group');
+    } else {
+      alert(data.error || 'Ошибка');
+    }
+  }
+
+  function openDeleteAccount() {
+    document.getElementById('deleteAccountModal').classList.add('active');
+  }
+
+  async function deleteAccount() {
+    const res = await fetch('/delete-account', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      window.location.href = '/';
+    } else {
+      alert('Ошибка удаления');
+    }
+  }
+
+  function openAdminLogin() {
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminError').textContent = '';
+    document.getElementById('adminLoginModal').classList.add('active');
+  }
+
+  async function checkAdminPassword() {
+    const password = document.getElementById('adminPassword').value;
+    const res = await fetch('/admin/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeModal('adminLoginModal');
+      openAdminPanel();
+    } else {
+      document.getElementById('adminError').textContent = data.error || 'Неверный пароль';
+    }
+  }
+
+  async function openAdminPanel() {
+    const res = await fetch('/admin/users');
+    const data = await res.json();
+    if (!data.ok) { alert('Нет доступа'); return; }
+
+    document.getElementById('adminStats').innerHTML = `
+      <div class="admin-stat"><div class="num">${data.stats.users}</div><div class="lbl">Юзеров</div></div>
+      <div class="admin-stat"><div class="num">${data.stats.chats}</div><div class="lbl">Чатов</div></div>
+      <div class="admin-stat"><div class="num">${data.stats.messages}</div><div class="lbl">Сообщений</div></div>
+    `;
+
+    const box = document.getElementById('adminUsers');
+    box.innerHTML = '';
+    data.users.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'admin-user';
+      const isBanned = u.banned ? true : false;
+      const isMe = u.id === me.id;
+      div.innerHTML = `
+        <div class="info">
+          <div class="uname ${u.role === 'creator' ? 'creator' : ''}">${escapeHtml(u.name)}${isMe ? ' (это ты)' : ''}</div>
+          <div class="uphone">${escapeHtml(u.phone)} ${isBanned ? '<span class="banned-tag">🚫 ЗАБАНЕН</span>' : ''}</div>
+        </div>
+        ${!isMe ? `<button class="${isBanned ? 'unban-btn' : 'ban-btn'}" onclick="toggleBan(${u.id}, ${isBanned ? 1 : 0})">${isBanned ? '✅ Разбанить' : '🚫 Забанить'}</button>` : ''}
+      `;
+      box.appendChild(div);
+    });
+
+    document.getElementById('adminPanel').classList.add('active');
+  }
+
+  async function toggleBan(userId, currentlyBanned) {
+    const res = await fetch('/admin/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, banned: !currentlyBanned })
+    });
+    const data = await res.json();
+    if (data.ok) openAdminPanel();
+    else alert(data.error);
+  }
+
+  function showAdminTab(tab, btn) {
+    document.querySelectorAll('.admin-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if (tab === 'users') {
+      document.getElementById('adminUsers').style.display = 'block';
+      document.getElementById('adminChats').style.display = 'none';
+    } else {
+      document.getElementById('adminUsers').style.display = 'none';
+      document.getElementById('adminChats').style.display = 'block';
+      loadAdminChats();
+    }
+  }
+
+  async function loadAdminChats() {
+    const res = await fetch('/admin/chats');
+    const data = await res.json();
+    if (!data.ok) return;
+    const box = document.getElementById('adminChats');
+    box.innerHTML = '<div class="admin-chats">';
+    if (data.chats.length === 0) {
+      box.innerHTML += '<p style="color:#8696a0;">Чатов нет</p>';
+    } else {
+      data.chats.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'admin-chat';
+        div.onclick = () => viewAdminChat(c.id, c.name || 'Личный чат');
+        div.innerHTML = `
+          <div class="cname">${c.type === 'group' ? '👥 ' : '👤 '}${escapeHtml(c.name || 'Личный чат')}</div>
+          <div class="cmembers">Участники: ${escapeHtml(c.members || '—')}</div>
+        `;
+        box.appendChild(div);
+      });
+    }
+    box.innerHTML += '</div>';
+  }
+
+  async function viewAdminChat(chatId, title) {
+    const res = await fetch('/admin/chats/' + chatId);
+    const data = await res.json();
+    if (!data.ok) return;
+
+    document.getElementById('adminChatTitle').textContent = '💬 ' + title;
+    const box = document.getElementById('adminMessages');
+    box.innerHTML = '';
+    if (data.messages.length === 0) {
+      box.innerHTML = '<p style="color:#8696a0;">Сообщений нет</p>';
+    } else {
+      data.messages.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'amsg';
+        div.innerHTML = `
+          <span class="aname ${m.role === 'creator' ? 'creator' : ''}">${escapeHtml(m.name)}</span>
+          <span class="atime">${formatTime(m.created_at)}</span>
+          <div style="margin-top:4px;">${escapeHtml(m.text)}</div>
+        `;
+        box.appendChild(div);
+      });
+    }
+    document.getElementById('adminChatView').classList.add('active');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  async function logout() {
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/';
+  }
+
+  document.getElementById('msgInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') send();
+  });
+  document
