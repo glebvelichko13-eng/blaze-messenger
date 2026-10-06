@@ -857,101 +857,6 @@ app.post('/chats/:id/avatar', avatarUpload.single('avatar'), (req, res) => {
   io.to('chat_' + chatId).emit('group_avatar_update', { chatId, avatar: fileUrl });
   res.json({ ok: true, avatar: fileUrl });
 });
-// ===== ПОКИНУТЬ ГРУППУ =====
-app.post('/chats/:id/leave', (req, res) => {
-  if (!req.session.userId) return res.json({ ok: false });
-  const chatId = req.params.id;
-  const me = req.session.userId;
-  const inChat = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, me);
-  if (!inChat) return res.json({ ok: false, error: 'Ты не в группе' });
-  const chat = db.prepare('SELECT type FROM chats WHERE id = ?').get(chatId);
-  if (!chat || chat.type !== 'group') return res.json({ ok: false, error: 'Только для групп' });
-
-  // Создатель группы (первый по дате)
-  const groupCreator = db.prepare('SELECT user_id FROM chat_members WHERE chat_id = ? ORDER BY user_id ASC LIMIT 1').get(chatId);
-  const isCreator = groupCreator && groupCreator.user_id === me;
-
-  // Удаляем себя из группы
-  db.prepare('DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?').run(chatId, me);
-
-  // Если создатель вышел — назначаем нового (следующий участник)
-  if (isCreator) {
-    const next = db.prepare('SELECT user_id FROM chat_members WHERE chat_id = ? ORDER BY user_id ASC LIMIT 1').get(chatId);
-    if (next) {
-      // Уведомляем всех, что новый создатель
-      io.to('chat_' + chatId).emit('group_creator_changed', { chatId, newCreatorId: next.user_id });
-    } else {
-      // В группе никого не осталось — удаляем группу
-      db.prepare('DELETE FROM messages WHERE chat_id = ?').run(chatId);
-      db.prepare('DELETE FROM chats WHERE id = ?').run(chatId);
-    }
-  }
-
-  // Уведомляем всех участников
-  io.to('chat_' + chatId).emit('member_left', { chatId, userId: me });
-  res.json({ ok: true });
-});
-
-// ===== УДАЛИТЬ УЧАСТНИКА (только создатель) =====
-app.post('/chats/:id/remove-member', (req, res) => {
-  if (!req.session.userId) return res.json({ ok: false });
-  const chatId = req.params.id;
-  const me = req.session.userId;
-  const { userId } = req.body;
-  if (!userId) return res.json({ ok: false, error: 'Не выбран участник' });
-  if (userId === me) return res.json({ ok: false, error: 'Себя нельзя — используй «Покинуть»' });
-
-  const inChat = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, me);
-  if (!inChat) return res.json({ ok: false, error: 'Ты не в группе' });
-
-  const chat = db.prepare('SELECT type FROM chats WHERE id = ?').get(chatId);
-  if (!chat || chat.type !== 'group') return res.json({ ok: false, error: 'Только для групп' });
-
-  const groupCreator = db.prepare('SELECT user_id FROM chat_members WHERE chat_id = ? ORDER BY user_id ASC LIMIT 1').get(chatId);
-  const isCreator = groupCreator && groupCreator.user_id === me;
-  if (!isCreator) return res.json({ ok: false, error: 'Только создатель может удалять' });
-
-  const target = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, userId);
-  if (!target) return res.json({ ok: false, error: 'Пользователь не в группе' });
-
-  db.prepare('DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?').run(chatId, userId);
-  io.to('chat_' + chatId).emit('member_removed', { chatId, userId: userId });
-  res.json({ ok: true });
-});
-
-// ===== УДАЛИТЬ ГРУППУ (только создатель) =====
-app.delete('/chats/:id', (req, res) => {
-  if (!req.session.userId) return res.json({ ok: false });
-  const chatId = req.params.id;
-  const me = req.session.userId;
-
-  const inChat = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, me);
-  if (!inChat) return res.json({ ok: false, error: 'Нет доступа' });
-
-  const chat = db.prepare('SELECT type FROM chats WHERE id = ?').get(chatId);
-  if (!chat || chat.type !== 'group') return res.json({ ok: false, error: 'Только для групп' });
-
-  const groupCreator = db.prepare('SELECT user_id FROM chat_members WHERE chat_id = ? ORDER BY user_id ASC LIMIT 1').get(chatId);
-  const isCreator = groupCreator && groupCreator.user_id === me;
-  if (!isCreator) return res.json({ ok: false, error: 'Только создатель может удалить' });
-
-  // Удаляем все файлы из сообщений
-  const msgs = db.prepare('SELECT file_url FROM messages WHERE chat_id = ? AND file_url != \'\'').all(chatId);
-  for (const m of msgs) {
-    const fp = path.join(__dirname, 'public', m.file_url.replace(/^\//, ''));
-    if (fs.existsSync(fp)) try { fs.unlinkSync(fp); } catch(e) {}
-  }
-
-  // Удаляем всё
-  db.prepare('DELETE FROM messages WHERE chat_id = ?').run(chatId);
-  db.prepare('DELETE FROM message_reads WHERE message_id IN (SELECT id FROM messages WHERE chat_id = ?)').run(chatId);
-  db.prepare('DELETE FROM chat_members WHERE chat_id = ?').run(chatId);
-  db.prepare('DELETE FROM chats WHERE id = ?').run(chatId);
-
-  io.to('chat_' + chatId).emit('group_deleted', { chatId });
-  log('GROUP', `Удалена группа #${chatId} пользователем #${me}`);
-  res.json({ ok: true });
-});
 
 app.post('/chats/:id/add-members', (req, res) => {
   if (!req.session.userId) return res.json({ ok: false });
@@ -982,29 +887,6 @@ app.post('/chats/:id/add-members', (req, res) => {
 });
 
 app.get('/chats/:id/members', (req, res) => {
-app.get('/chats/:id/members-info', (req, res) => {
-  if (!req.session.userId) return res.json({ ok: false });
-  const chatId = req.params.id;
-  const me = req.session.userId;
-  const inChat = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, me);
-  if (!inChat) return res.json({ ok: false });
-  const chat = db.prepare('SELECT type FROM chats WHERE id = ?').get(chatId);
-  if (!chat || chat.type !== 'group') return res.json({ ok: false });
-  const groupCreator = db.prepare('SELECT user_id FROM chat_members WHERE chat_id = ? ORDER BY user_id ASC LIMIT 1').get(chatId);
-  const isCreatorMe = groupCreator && groupCreator.user_id === me;
-  const members = db.prepare(`
-    SELECT u.id, u.name, u.role, u.avatar, u.status
-    FROM users u JOIN chat_members m ON m.user_id = u.id
-    WHERE m.chat_id = ?
-  `).all(chatId);
-  res.json({
-    ok: true,
-    members,
-    isCreatorMe,
-    creatorId: groupCreator ? groupCreator.user_id : null
-  });
-});
-
   if (!req.session.userId) return res.json({ ok: false });
   const chatId = req.params.id;
   const inChat = db.prepare('SELECT 1 FROM chat_members WHERE chat_id = ? AND user_id = ?').get(chatId, req.session.userId);
@@ -1484,9 +1366,6 @@ io.on('connection', (socket) => {
       time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
       readBy: 0, delivered: 0
     });
-  });
-  socket.on('leave_group', ({ chatId }) => {
-    socket.leave('chat_' + chatId);
   });
 
   socket.on('disconnect', () => {
