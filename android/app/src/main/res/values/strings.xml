@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Blaze</string>
+    <string name="title_activity_main">Blaze</string>
+    <string name="package_name">com.blaze.messenger</string>
+    <string name="custom_url_scheme">com.blaze.messenger</string>
+</resources>
