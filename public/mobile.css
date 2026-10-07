@@ -1,0 +1,115 @@
+/* ===== BLAZE — МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media screen and (max-width: 768px) {
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    font-size: 14px !important;
+  }
+
+  .app {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    flex-direction: column !important;
+    display: flex !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: 45vh !important;
+    min-height: 200px !important;
+    max-height: 50vh !important;
+    border-right: none !important;
+    border-bottom: 2px solid #2a3942 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar-header { padding: 8px 12px !important; font-size: 14px !important; }
+  .blaze-logo { font-size: 15px !important; }
+  .sidebar-header .me { font-size: 11px !important; }
+  .header-btns button { font-size: 16px !important; padding: 4px 6px !important; }
+
+  .stories-bar { padding: 6px 8px !important; gap: 8px !important; }
+  .story-circle { width: 52px !important; }
+  .story-ring { width: 46px !important; height: 46px !important; }
+  .story-name { font-size: 10px !important; width: 52px !important; }
+
+  .chats-list { flex: 1 !important; overflow-y: auto !important; }
+  .chat-item { padding: 8px 12px !important; }
+  .chat-avatar { width: 36px !important; height: 36px !important; font-size: 14px !important; }
+  .chat-title { font-size: 13px !important; }
+  .chat-subtitle, .chat-status { font-size: 11px !important; }
+
+  .create-btns { padding: 6px !important; gap: 4px !important; }
+  .create-btns button { padding: 8px !important; font-size: 12px !important; }
+
+  .main {
+    width: 100% !important;
+    height: 55vh !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #0b141a !important;
+  }
+
+  .main-header { padding: 8px 12px !important; font-size: 14px !important; flex-shrink: 0 !important; }
+  .main-header .msub { font-size: 10px !important; }
+
+  .header-actions { padding: 6px 10px !important; gap: 4px !important; flex-wrap: wrap !important; }
+  .header-actions button { padding: 5px 8px !important; font-size: 11px !important; }
+
+  .messages { flex: 1 !important; padding: 8px !important; gap: 4px !important; overflow-y: auto !important; }
+  .msg { max-width: 88% !important; padding: 6px 10px !important; font-size: 13px !important; border-radius: 8px !important; }
+  .msg-image { max-width: 220px !important; max-height: 280px !important; }
+  .msg-video { max-width: 220px !important; max-height: 280px !important; }
+  .msg-sticker { width: 120px !important; height: 120px !important; }
+  .msg .name { font-size: 11px !important; }
+  .msg .time { font-size: 9px !important; }
+
+  .input-area { padding: 6px 8px !important; gap: 4px !important; flex-shrink: 0 !important; }
+  .input-area input[type="text"] { padding: 9px 12px !important; font-size: 13px !important; border-radius: 18px !important; }
+  .input-area .icon-btn { padding: 0 8px !important; font-size: 18px !important; }
+  .input-area .send-btn { padding: 0 14px !important; font-size: 16px !important; }
+
+  .modal-box { width: 92vw !important; max-width: 92vw !important; padding: 16px !important; max-height: 85vh !important; }
+  .modal-box h3 { font-size: 16px !important; }
+  .modal-box input[type="text"], .modal-box input[type="password"], .modal-box input[type="number"] { padding: 10px !important; font-size: 13px !important; }
+  .modal-box .actions button { padding: 10px !important; font-size: 13px !important; }
+  .admin-box { width: 96vw !important; max-width: 96vw !important; }
+
+  .settings-modal, .privacy-modal { width: 100vw !important; }
+  .settings-header { padding: 12px 15px !important; font-size: 16px !important; }
+  .settings-item { padding: 12px 15px !important; }
+  .settings-item .s-icon { font-size: 18px !important; width: 32px !important; }
+  .settings-item .s-title { font-size: 14px !important; }
+  .settings-item .s-sub { font-size: 11px !important; }
+
+  .emoji-panel, .sticker-panel { width: calc(100vw - 20px) !important; left: 10px !important; right: 10px !important; max-height: 45vh !important; }
+  .emoji-grid { grid-template-columns: repeat(7, 1fr) !important; }
+  .emoji-grid button { font-size: 20px !important; padding: 4px !important; }
+  .sticker-grid { grid-template-columns: repeat(3, 1fr) !important; }
+
+  .admin-stats { flex-direction: column !important; gap: 6px !important; }
+  .admin-tabs { flex-wrap: wrap !important; gap: 4px !important; }
+  .admin-tabs button { padding: 6px 10px !important; font-size: 11px !important; }
+  .admin-user { flex-wrap: wrap !important; padding: 8px !important; }
+
+  .story-viewer .story-content img, .story-viewer .story-content video { max-width: 100vw !important; max-height: 70vh !important; }
+  .story-author-name { font-size: 13px !important; }
+}
+
+@media screen and (max-width: 400px) {
+  .chat-avatar { width: 32px !important; height: 32px !important; font-size: 12px !important; }
+  .msg { max-width: 92% !important; font-size: 12px !important; }
+  .input-area .icon-btn { padding: 0 6px !important; font-size: 16px !important; }
+}
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  .sidebar { height: 40vh !important; }
+  .main { height: 60vh !important; }
+}

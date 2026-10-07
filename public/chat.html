@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Blaze 🔥</title>
+<title>Blaze 🔥</title><link rel="stylesheet" href="/mobile.css">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
 body { background: #0b141a; height: 100vh; display: flex; justify-content: center; align-items: center; }
@@ -378,6 +378,32 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
 .btn-leave-group:hover { background: #ff4444 !important; }
 .btn-delete-group { background: #8b0000 !important; color: white !important; }
 .btn-delete-group:hover { background: #a00000 !important; }
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 768px) {
+  body { font-size: 12px; }
+  .app { max-width: 100%; height: 100vh; border-radius: 0; flex-direction: column; }
+  .sidebar { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid #2a3942; }
+  .sidebar-header { padding: 8px 10px; font-size: 13px; }
+  .blaze-logo { font-size: 14px; }
+  .header-btns button { font-size: 14px; padding: 3px 5px; }
+  .chat-item { padding: 8px 10px; }
+  .chat-avatar { width: 32px; height: 32px; font-size: 12px; }
+  .chat-title { font-size: 12px; }
+  .chat-subtitle { font-size: 10px; }
+  .create-btns button { padding: 6px; font-size: 10px; }
+  .main { height: 55vh; }
+  .main-header { padding: 8px 12px; font-size: 13px; }
+  .messages { padding: 8px; }
+  .msg { max-width: 90%; font-size: 12px; padding: 5px 8px; }
+  .input-area { padding: 6px; }
+  .input-area input[type="text"] { font-size: 12px; padding: 8px 10px; }
+  .input-area .send-btn { padding: 0 12px; font-size: 14px; }
+  .stories-bar { padding: 8px; }
+  .story-circle { width: 48px; }
+  .story-ring { width: 42px; height: 42px; }
+  .modal-box { width: 90%; max-width: 90%; padding: 15px; }
+  .admin-box { width: 95%; }
+}
 </style>
 </head>
 <body>
@@ -2483,75 +2509,90 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     document.getElementById('settingsModal').classList.add('active');
   }
 
-  async function syncContacts() {
-    if (typeof Capacitor === 'undefined' || !Capacitor.Plugins || !Capacitor.Plugins.Contacts) {
-      alert('📱 Синхронизация контактов работает только в APK-приложении');
+async function syncContacts() {
+  if (typeof Capacitor === 'undefined' || !Capacitor.Plugins || !Capacitor.Plugins.Contacts) {
+    alert('📱 Синхронизация контактов работает только в APK-приложении');
+    return;
+  }
+  try {
+    // 1. Проверяем текущее разрешение
+    const check = await Capacitor.Plugins.Contacts.checkPermissions();
+    let permission = check;
+    
+    // 2. Если не granted — запрашиваем
+    if (check.contacts !== 'granted') {
+      permission = await Capacitor.Plugins.Contacts.requestPermissions();
+    }
+    
+    // 3. Если всё равно не granted — ошибка
+    if (permission.contacts !== 'granted') {
+      alert('❌ Нужно разрешение на доступ к контактам. Открой Настройки телефона → Приложения → Blaze → Разрешения → Контакты → Разрешить');
       return;
     }
-    try {
-      const permission = await Capacitor.Plugins.Contacts.requestPermissions();
-      if (permission.contacts !== 'granted') {
-        alert('❌ Нужно разрешение на доступ к контактам');
-        return;
+    
+    const box = document.getElementById('contactsSyncResult');
+    if (box) box.innerHTML = '⏳ Читаем контакты...';
+    
+    const result = await Capacitor.Plugins.Contacts.getContacts({ fields: ['name', 'tel'] });
+    const phones = [];
+    result.contacts.forEach(c => {
+      if (c.tel && c.tel.length > 0) {
+        c.tel.forEach(t => { if (t.number) phones.push(t.number); });
       }
-      const box = document.getElementById('contactsSyncResult');
-      if (box) box.innerHTML = '⏳ Читаем контакты...';
-      const result = await Capacitor.Plugins.Contacts.getContacts({ fields: ['name', 'tel'] });
-      const phones = [];
-      result.contacts.forEach(c => {
-        if (c.tel && c.tel.length > 0) {
-          c.tel.forEach(t => { if (t.number) phones.push(t.number); });
-        }
-      });
-      if (phones.length === 0) {
-        if (box) box.innerHTML = '<p style="color:#8696a0;">Контактов с номерами нет</p>';
-        return;
-      }
-      if (box) box.innerHTML = `⏳ Найдено ${phones.length} номеров. Ищем в Blaze...`;
-      const res = await securePost('/contacts/sync', { phones });
-      const data = await res.json();
-      if (!data.ok) {
-        if (box) box.innerHTML = `<p style="color:#ff6b6b;">${data.error || 'Ошибка'}</p>`;
-        return;
-      }
-      if (box) {
-        box.innerHTML = '';
-        if (data.matched.length === 0) {
-          box.innerHTML = '<p style="color:#8696a0;">Никого из контактов нет в Blaze 😢</p>';
-          return;
-        }
-        box.innerHTML = `<p style="color:#00a884;font-weight:bold;">Найдено в Blaze: ${data.matched.length}</p>`;
-        data.matched.forEach(u => {
-          const div = document.createElement('div');
-          div.className = 'blocked-user-item';
-          div.style.marginTop = '8px';
-          const av = u.avatar
-            ? `<div class="bu-avatar"><img src="${u.avatar}"></div>`
-            : `<div class="bu-avatar">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
-          div.innerHTML = `
-            ${av}
-            <div class="bu-info">
-              <div class="bu-name">${escapeHtml(u.name)}</div>
-              <div class="bu-phone">📱 ${escapeHtml(u.phone)}</div>
-            </div>
-            <button onclick="contactsDirectChat(${u.id}, '${escapeHtml(u.name)}')">💬 Чат</button>
-          `;
-          box.appendChild(div);
-        });
-        const addAllBtn = document.createElement('button');
-        addAllBtn.textContent = '➕ Добавить всех в чат';
-        addAllBtn.style.cssText = 'width:100%;padding:12px;margin-top:15px;background:#ff6b00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;';
-        addAllBtn.onclick = () => contactsAddAll(data.matched);
-        box.appendChild(addAllBtn);
-      }
-    } catch(e) {
-      console.error('Ошибка контактов:', e);
-      const box = document.getElementById('contactsSyncResult');
-      if (box) box.innerHTML = `<p style="color:#ff6b6b;">Ошибка: ${e.message || 'Неизвестная'}</p>`;
-      alert('❌ Ошибка чтения контактов: ' + (e.message || 'Неизвестная'));
+    });
+    
+    if (phones.length === 0) {
+      if (box) box.innerHTML = '<p style="color:#8696a0;">Контактов с номерами нет</p>';
+      return;
     }
+    
+    if (box) box.innerHTML = `⏳ Найдено ${phones.length} номеров. Ищем в Blaze...`;
+    
+    const res = await securePost('/contacts/sync', { phones });
+    const data = await res.json();
+    
+    if (!data.ok) {
+      if (box) box.innerHTML = `<p style="color:#ff6b6b;">${data.error || 'Ошибка'}</p>`;
+      return;
+    }
+    
+    if (box) {
+      box.innerHTML = '';
+      if (data.matched.length === 0) {
+        box.innerHTML = '<p style="color:#8696a0;">Никого из контактов нет в Blaze 😢</p>';
+        return;
+      }
+      box.innerHTML = `<p style="color:#00a884;font-weight:bold;">Найдено в Blaze: ${data.matched.length}</p>`;
+      data.matched.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'blocked-user-item';
+        div.style.marginTop = '8px';
+        const av = u.avatar
+          ? `<div class="bu-avatar"><img src="${u.avatar}"></div>`
+          : `<div class="bu-avatar">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+        div.innerHTML = `
+          ${av}
+          <div class="bu-info">
+            <div class="bu-name">${escapeHtml(u.name)}</div>
+            <div class="bu-phone">📱 ${escapeHtml(u.phone)}</div>
+          </div>
+          <button onclick="contactsDirectChat(${u.id}, '${escapeHtml(u.name)}')">💬 Чат</button>
+        `;
+        box.appendChild(div);
+      });
+      const addAllBtn = document.createElement('button');
+      addAllBtn.textContent = '➕ Добавить всех в чат';
+      addAllBtn.style.cssText = 'width:100%;padding:12px;margin-top:15px;background:#ff6b00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;';
+      addAllBtn.onclick = () => contactsAddAll(data.matched);
+      box.appendChild(addAllBtn);
+    }
+  } catch(e) {
+    console.error('Ошибка контактов:', e);
+    const box = document.getElementById('contactsSyncResult');
+    if (box) box.innerHTML = `<p style="color:#ff6b6b;">Ошибка: ${e.message || 'Неизвестная'}</p>`;
+    alert('❌ Ошибка чтения контактов: ' + (e.message || 'Неизвестная'));
   }
-
+}
   async function contactsDirectChat(userId, name) {
     const res = await securePost('/chats/private/direct', { userId });
     const data = await res.json();
