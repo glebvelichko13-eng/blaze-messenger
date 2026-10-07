@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Blaze 🔥</title>
-<link rel="stylesheet" href="/mobile.css">
+<title>Blaze 🔥</title><link rel="stylesheet" href="/mobile.css">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
 body { background: #0b141a; height: 100vh; display: flex; justify-content: center; align-items: center; }
@@ -379,6 +378,32 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
 .btn-leave-group:hover { background: #ff4444 !important; }
 .btn-delete-group { background: #8b0000 !important; color: white !important; }
 .btn-delete-group:hover { background: #a00000 !important; }
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 768px) {
+  body { font-size: 12px; }
+  .app { max-width: 100%; height: 100vh; border-radius: 0; flex-direction: column; }
+  .sidebar { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid #2a3942; }
+  .sidebar-header { padding: 8px 10px; font-size: 13px; }
+  .blaze-logo { font-size: 14px; }
+  .header-btns button { font-size: 14px; padding: 3px 5px; }
+  .chat-item { padding: 8px 10px; }
+  .chat-avatar { width: 32px; height: 32px; font-size: 12px; }
+  .chat-title { font-size: 12px; }
+  .chat-subtitle { font-size: 10px; }
+  .create-btns button { padding: 6px; font-size: 10px; }
+  .main { height: 55vh; }
+  .main-header { padding: 8px 12px; font-size: 13px; }
+  .messages { padding: 8px; }
+  .msg { max-width: 90%; font-size: 12px; padding: 5px 8px; }
+  .input-area { padding: 6px; }
+  .input-area input[type="text"] { font-size: 12px; padding: 8px 10px; }
+  .input-area .send-btn { padding: 0 12px; font-size: 14px; }
+  .stories-bar { padding: 8px; }
+  .story-circle { width: 48px; }
+  .story-ring { width: 42px; height: 42px; }
+  .modal-box { width: 90%; max-width: 90%; padding: 15px; }
+  .admin-box { width: 95%; }
+}
 </style>
 </head>
 <body>
@@ -443,7 +468,6 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
 <input type="file" id="stickerFileInput" accept="image/*" style="display:none;" onchange="uploadSticker(this)">
 <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
 <input type="file" id="groupAvatarInput" accept="image/*" style="display:none;" onchange="uploadGroupAvatar(this)">
-
 <div class="modal" id="privateModal">
   <div class="modal-box">
     <h3>🔍 Найти по номеру</h3>
@@ -743,7 +767,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
       </div>
     </div>
     <div class="settings-section">
-      <div class="settings-item" onclick="openContactsSync()">
+          <div class="settings-item" onclick="openContactsSync()">
         <div class="s-icon">📱</div>
         <div class="s-text"><div class="s-title">Контакты</div><div class="s-sub">Найти друзей из телефонной книги</div></div>
         <div class="s-arrow">›</div>
@@ -765,7 +789,6 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     </div>
   </div>
 </div>
-
 <!-- ===== МОДАЛКА КОНТАКТОВ ===== -->
 <div class="privacy-modal" id="contactsModal">
   <div class="settings-header">
@@ -1808,7 +1831,6 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     input.value = '';
     input.focus();
   }
-
   function openMyProfile() {
     currentProfileId = me.id;
     const avEl = document.getElementById('profileAvatar');
@@ -2057,7 +2079,6 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     else alert(data.error || 'Ошибка');
     pendingGroupUserId = null;
   }
-
   async function loadAdminNews() {
     const res = await fetch('/admin/news');
     const data = await res.json();
@@ -2222,6 +2243,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     document.getElementById('adminChatView').classList.add('active');
   }
 
+  // ===== НАСТРОЙКИ =====
   function openSettings() { document.getElementById('settingsModal').classList.add('active'); loadPrivacyValues(); }
   function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
@@ -2289,6 +2311,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
 
   function closeChoice() { document.getElementById('choiceModal').classList.remove('active'); currentChoiceField = null; }
 
+  // ===== ЗАБЛОКИРОВАННЫЕ =====
   function openBlocked() { closeSettings(); document.getElementById('blockedModal').classList.add('active'); showBlockedTab('users'); }
   function closeBlocked() { document.getElementById('blockedModal').classList.remove('active'); document.getElementById('settingsModal').classList.add('active'); }
 
@@ -2352,6 +2375,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     if (data.ok) { if (phone) await securePost('/settings/unblock-phone', { phone }); loadBlockedUsers(); loadChats(); }
   }
 
+  // ===== ОНЛАЙН-СТАТУС =====
   function formatLastSeen(lastSeen, isOnline, hideOnline, hideLastSeen) {
     if (hideOnline) return '';
     if (isOnline) return '🟢 в сети';
@@ -2398,7 +2422,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
       updateHeaderOnline(currentChatData.otherId);
     }
   }, 30000);
-
+  // ===== УТИЛИТЫ =====
   function closeModal(id) {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
@@ -2406,7 +2430,11 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
 
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, m => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
     }[m]));
   }
 
@@ -2416,18 +2444,35 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     window.location.href = '/';
   }
 
-  document.getElementById('msgInput').addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
-  document.getElementById('searchPhone').addEventListener('keypress', e => { if (e.key === 'Enter') searchUser(); });
-  document.getElementById('adminPassword').addEventListener('keypress', e => { if (e.key === 'Enter') checkAdminPassword(); });
-  document.getElementById('adminSearchNameInput').addEventListener('keypress', e => { if (e.key === 'Enter') adminSearchByName(); });
-  document.getElementById('blockPhoneInput').addEventListener('keypress', e => { if (e.key === 'Enter') blockPhone(); });
-  document.getElementById('groupPhone').addEventListener('keypress', e => { if (e.key === 'Enter') addGroupUser(); });
-  document.getElementById('addMemberPhone').addEventListener('keypress', e => { if (e.key === 'Enter') addMemberToGroup(); });
+  // ===== ОБРАБОТЧИКИ =====
+  document.getElementById('msgInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') send();
+  });
+  document.getElementById('searchPhone').addEventListener('keypress', e => {
+    if (e.key === 'Enter') searchUser();
+  });
+  document.getElementById('adminPassword').addEventListener('keypress', e => {
+    if (e.key === 'Enter') checkAdminPassword();
+  });
+  document.getElementById('adminSearchNameInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') adminSearchByName();
+  });
+  document.getElementById('blockPhoneInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') blockPhone();
+  });
+  document.getElementById('groupPhone').addEventListener('keypress', e => {
+    if (e.key === 'Enter') addGroupUser();
+  });
+  document.getElementById('addMemberPhone').addEventListener('keypress', e => {
+    if (e.key === 'Enter') addMemberToGroup();
+  });
 
+  // Закрытие модалок по клику на фон
   document.querySelectorAll('.modal').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
   });
 
+  // Обработчик Esc + стрелок
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       const newsOverlay = document.getElementById('newsOverlay');
@@ -2442,10 +2487,16 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
         else if (blockedModal && blockedModal.classList.contains('active')) closeBlocked();
       }
     }
-    if (e.key === 'ArrowRight') { const sv = document.getElementById('storyViewer'); if (sv && sv.classList.contains('active')) nextStory(); }
-    if (e.key === 'ArrowLeft') { const sv = document.getElementById('storyViewer'); if (sv && sv.classList.contains('active')) prevStory(); }
+    if (e.key === 'ArrowRight') {
+      const storyViewer = document.getElementById('storyViewer');
+      if (storyViewer && storyViewer.classList.contains('active')) nextStory();
+    }
+    if (e.key === 'ArrowLeft') {
+      const storyViewer = document.getElementById('storyViewer');
+      if (storyViewer && storyViewer.classList.contains('active')) prevStory();
+    }
   });
-
+  // ===== КОНТАКТЫ =====
   function openContactsSync() {
     closeSettings();
     document.getElementById('contactsModal').classList.add('active');
@@ -2458,64 +2509,99 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     document.getElementById('settingsModal').classList.add('active');
   }
 
-  async function syncContacts() {
-    if (typeof Capacitor === 'undefined' || !Capacitor.Plugins || !Capacitor.Plugins.Contacts) {
-      alert('📱 Синхронизация контактов работает только в APK-приложении');
+async function syncContacts() {
+  if (typeof Capacitor === 'undefined' || !Capacitor.Plugins || !Capacitor.Plugins.Contacts) {
+    alert('📱 Синхронизация контактов работает только в APK-приложении');
+    return;
+  }
+  try {
+    // 1. Проверяем текущее разрешение
+    const check = await Capacitor.Plugins.Contacts.checkPermissions();
+    let permission = check;
+    
+    // 2. Если не granted — запрашиваем
+    if (check.contacts !== 'granted') {
+      permission = await Capacitor.Plugins.Contacts.requestPermissions();
+    }
+    
+    // 3. Если всё равно не granted — ошибка
+    if (permission.contacts !== 'granted') {
+      alert('❌ Нужно разрешение на доступ к контактам. Открой Настройки телефона → Приложения → Blaze → Разрешения → Контакты → Разрешить');
       return;
     }
-    try {
-      const check = await Capacitor.Plugins.Contacts.checkPermissions();
-      let permission = check;
-      if (check.contacts !== 'granted') {
-        permission = await Capacitor.Plugins.Contacts.requestPermissions();
+    
+    const box = document.getElementById('contactsSyncResult');
+    if (box) box.innerHTML = '⏳ Читаем контакты...';
+    
+    const result = await Capacitor.Plugins.Contacts.getContacts({ fields: ['name', 'tel'] });
+    const phones = [];
+    result.contacts.forEach(c => {
+      if (c.tel && c.tel.length > 0) {
+        c.tel.forEach(t => { if (t.number) phones.push(t.number); });
       }
-      if (permission.contacts !== 'granted') {
-        alert('❌ Нужно разрешение. Настройки телефона → Приложения → Blaze → Разрешения → Контакты → Разрешить');
+    });
+    
+    if (phones.length === 0) {
+      if (box) box.innerHTML = '<p style="color:#8696a0;">Контактов с номерами нет</p>';
+      return;
+    }
+    
+    if (box) box.innerHTML = `⏳ Найдено ${phones.length} номеров. Ищем в Blaze...`;
+    
+    const res = await securePost('/contacts/sync', { phones });
+    const data = await res.json();
+    
+    if (!data.ok) {
+      if (box) box.innerHTML = `<p style="color:#ff6b6b;">${data.error || 'Ошибка'}</p>`;
+      return;
+    }
+    
+    if (box) {
+      box.innerHTML = '';
+      if (data.matched.length === 0) {
+        box.innerHTML = '<p style="color:#8696a0;">Никого из контактов нет в Blaze 😢</p>';
         return;
       }
-      const box = document.getElementById('contactsSyncResult');
-      if (box) box.innerHTML = '⏳ Читаем контакты...';
-      const result = await Capacitor.Plugins.Contacts.getContacts({ fields: ['name', 'tel'] });
-      const phones = [];
-      result.contacts.forEach(c => {
-        if (c.tel && c.tel.length > 0) c.tel.forEach(t => { if (t.number) phones.push(t.number); });
+      box.innerHTML = `<p style="color:#00a884;font-weight:bold;">Найдено в Blaze: ${data.matched.length}</p>`;
+      data.matched.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'blocked-user-item';
+        div.style.marginTop = '8px';
+        const av = u.avatar
+          ? `<div class="bu-avatar"><img src="${u.avatar}"></div>`
+          : `<div class="bu-avatar">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+        div.innerHTML = `
+          ${av}
+          <div class="bu-info">
+            <div class="bu-name">${escapeHtml(u.name)}</div>
+            <div class="bu-phone">📱 ${escapeHtml(u.phone)}</div>
+          </div>
+          <button onclick="contactsDirectChat(${u.id}, '${escapeHtml(u.name)}')">💬 Чат</button>
+        `;
+        box.appendChild(div);
       });
-      if (phones.length === 0) { if (box) box.innerHTML = '<p style="color:#8696a0;">Контактов с номерами нет</p>'; return; }
-      if (box) box.innerHTML = `⏳ Найдено ${phones.length} номеров. Ищем в Blaze...`;
-      const res = await securePost('/contacts/sync', { phones });
-      const data = await res.json();
-      if (!data.ok) { if (box) box.innerHTML = `<p style="color:#ff6b6b;">${data.error || 'Ошибка'}</p>`; return; }
-      if (box) {
-        box.innerHTML = '';
-        if (data.matched.length === 0) { box.innerHTML = '<p style="color:#8696a0;">Никого из контактов нет в Blaze 😢</p>'; return; }
-        box.innerHTML = `<p style="color:#00a884;font-weight:bold;">Найдено в Blaze: ${data.matched.length}</p>`;
-        data.matched.forEach(u => {
-          const div = document.createElement('div');
-          div.className = 'blocked-user-item';
-          div.style.marginTop = '8px';
-          const av = u.avatar ? `<div class="bu-avatar"><img src="${u.avatar}"></div>` : `<div class="bu-avatar">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
-          div.innerHTML = `${av}<div class="bu-info"><div class="bu-name">${escapeHtml(u.name)}</div><div class="bu-phone">📱 ${escapeHtml(u.phone)}</div></div><button onclick="contactsDirectChat(${u.id}, '${escapeHtml(u.name)}')">💬 Чат</button>`;
-          box.appendChild(div);
-        });
-        const addAllBtn = document.createElement('button');
-        addAllBtn.textContent = '➕ Добавить всех в чат';
-        addAllBtn.style.cssText = 'width:100%;padding:12px;margin-top:15px;background:#ff6b00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;';
-        addAllBtn.onclick = () => contactsAddAll(data.matched);
-        box.appendChild(addAllBtn);
-      }
-    } catch(e) {
-      console.error('Ошибка контактов:', e);
-      const box = document.getElementById('contactsSyncResult');
-      if (box) box.innerHTML = `<p style="color:#ff6b6b;">Ошибка: ${e.message || 'Неизвестная'}</p>`;
-      alert('❌ Ошибка: ' + (e.message || 'Неизвестная'));
+      const addAllBtn = document.createElement('button');
+      addAllBtn.textContent = '➕ Добавить всех в чат';
+      addAllBtn.style.cssText = 'width:100%;padding:12px;margin-top:15px;background:#ff6b00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;';
+      addAllBtn.onclick = () => contactsAddAll(data.matched);
+      box.appendChild(addAllBtn);
     }
+  } catch(e) {
+    console.error('Ошибка контактов:', e);
+    const box = document.getElementById('contactsSyncResult');
+    if (box) box.innerHTML = `<p style="color:#ff6b6b;">Ошибка: ${e.message || 'Неизвестная'}</p>`;
+    alert('❌ Ошибка чтения контактов: ' + (e.message || 'Неизвестная'));
   }
-
+}
   async function contactsDirectChat(userId, name) {
     const res = await securePost('/chats/private/direct', { userId });
     const data = await res.json();
-    if (data.ok) { closeSettings(); await loadChats(); socket.emit('join_chat', data.chatId); openChat(data.chatId, name, 'user', '', userId, '', 'private'); }
-    else alert(data.error || 'Ошибка');
+    if (data.ok) {
+      closeSettings();
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, 'user', '', userId, '', 'private');
+    } else alert(data.error || 'Ошибка');
   }
 
   async function contactsAddAll(matched) {
@@ -2533,6 +2619,7 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
     await loadChats();
   }
 
+  // ===== ЗАПУСК =====
   init();
 </script>
 </body>
