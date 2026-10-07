@@ -1,0 +1,15 @@
+node_modules/
+database.db
+logs.txt
+.env
+public/uploads/
+public/kluch.txt
+*backup*.js
+server_backup_sqlite.js
+reset-admin.js
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/app/src/main/assets/public/

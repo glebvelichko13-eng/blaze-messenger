@@ -1,0 +1,9 @@
+{
+  "appId": "com.blaze.messenger",
+  "appName": "Blaze",
+  "webDir": "public",
+  "server": {
+    "url": "https://blaze-messenger.onrender.com",
+    "cleartext": true
+  }
+}

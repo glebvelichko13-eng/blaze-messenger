@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Blaze 🔥</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
@@ -740,9 +741,9 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
       </div>
     </div>
     <div class="settings-section">
-      <div class="settings-item" onclick="alert('📱 Синхронизация контактов будет доступна в APK-приложении');">
+          <div class="settings-item" onclick="openContactsSync()">
         <div class="s-icon">📱</div>
-        <div class="s-text"><div class="s-title">Контакты</div><div class="s-sub">Скоро (в APK)</div></div>
+        <div class="s-text"><div class="s-title">Контакты</div><div class="s-sub">Найти друзей из телефонной книги</div></div>
         <div class="s-arrow">›</div>
       </div>
     </div>
@@ -759,6 +760,22 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
         <div class="s-text"><div class="s-title">Выйти из аккаунта</div></div>
         <div class="s-arrow">›</div>
       </div>
+    </div>
+  </div>
+</div>
+<!-- ===== МОДАЛКА КОНТАКТОВ ===== -->
+<div class="privacy-modal" id="contactsModal">
+  <div class="settings-header">
+    <button onclick="closeContactsSync()">←</button>
+    <span>📱 Контакты</span>
+  </div>
+  <div class="settings-body">
+    <div style="text-align:center;padding:20px;">
+      <p style="color:#8696a0;margin-bottom:15px;">Нажми кнопку — приложение прочитает телефонную книгу и найдёт друзей в Blaze.</p>
+      <button onclick="syncContacts()" style="padding:14px 30px;background:#ff6b00;color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;">
+        📱 Синхронизировать контакты
+      </button>
+      <div id="contactsSyncResult" style="margin-top:20px;text-align:left;"></div>
     </div>
   </div>
 </div>
@@ -2453,6 +2470,113 @@ body { background: #0b141a; height: 100vh; display: flex; justify-content: cente
       if (storyViewer && storyViewer.classList.contains('active')) prevStory();
     }
   });
+  // ===== КОНТАКТЫ =====
+  function openContactsSync() {
+    closeSettings();
+    document.getElementById('contactsModal').classList.add('active');
+    const box = document.getElementById('contactsSyncResult');
+    if (box) box.innerHTML = '';
+  }
+
+  function closeContactsSync() {
+    document.getElementById('contactsModal').classList.remove('active');
+    document.getElementById('settingsModal').classList.add('active');
+  }
+
+  async function syncContacts() {
+    if (typeof Capacitor === 'undefined' || !Capacitor.Plugins || !Capacitor.Plugins.Contacts) {
+      alert('📱 Синхронизация контактов работает только в APK-приложении');
+      return;
+    }
+    try {
+      const permission = await Capacitor.Plugins.Contacts.requestPermissions();
+      if (permission.contacts !== 'granted') {
+        alert('❌ Нужно разрешение на доступ к контактам');
+        return;
+      }
+      const box = document.getElementById('contactsSyncResult');
+      if (box) box.innerHTML = '⏳ Читаем контакты...';
+      const result = await Capacitor.Plugins.Contacts.getContacts({ fields: ['name', 'tel'] });
+      const phones = [];
+      result.contacts.forEach(c => {
+        if (c.tel && c.tel.length > 0) {
+          c.tel.forEach(t => { if (t.number) phones.push(t.number); });
+        }
+      });
+      if (phones.length === 0) {
+        if (box) box.innerHTML = '<p style="color:#8696a0;">Контактов с номерами нет</p>';
+        return;
+      }
+      if (box) box.innerHTML = `⏳ Найдено ${phones.length} номеров. Ищем в Blaze...`;
+      const res = await securePost('/contacts/sync', { phones });
+      const data = await res.json();
+      if (!data.ok) {
+        if (box) box.innerHTML = `<p style="color:#ff6b6b;">${data.error || 'Ошибка'}</p>`;
+        return;
+      }
+      if (box) {
+        box.innerHTML = '';
+        if (data.matched.length === 0) {
+          box.innerHTML = '<p style="color:#8696a0;">Никого из контактов нет в Blaze 😢</p>';
+          return;
+        }
+        box.innerHTML = `<p style="color:#00a884;font-weight:bold;">Найдено в Blaze: ${data.matched.length}</p>`;
+        data.matched.forEach(u => {
+          const div = document.createElement('div');
+          div.className = 'blocked-user-item';
+          div.style.marginTop = '8px';
+          const av = u.avatar
+            ? `<div class="bu-avatar"><img src="${u.avatar}"></div>`
+            : `<div class="bu-avatar">${u.name[0] ? u.name[0].toUpperCase() : '?'}</div>`;
+          div.innerHTML = `
+            ${av}
+            <div class="bu-info">
+              <div class="bu-name">${escapeHtml(u.name)}</div>
+              <div class="bu-phone">📱 ${escapeHtml(u.phone)}</div>
+            </div>
+            <button onclick="contactsDirectChat(${u.id}, '${escapeHtml(u.name)}')">💬 Чат</button>
+          `;
+          box.appendChild(div);
+        });
+        const addAllBtn = document.createElement('button');
+        addAllBtn.textContent = '➕ Добавить всех в чат';
+        addAllBtn.style.cssText = 'width:100%;padding:12px;margin-top:15px;background:#ff6b00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;';
+        addAllBtn.onclick = () => contactsAddAll(data.matched);
+        box.appendChild(addAllBtn);
+      }
+    } catch(e) {
+      console.error('Ошибка контактов:', e);
+      const box = document.getElementById('contactsSyncResult');
+      if (box) box.innerHTML = `<p style="color:#ff6b6b;">Ошибка: ${e.message || 'Неизвестная'}</p>`;
+      alert('❌ Ошибка чтения контактов: ' + (e.message || 'Неизвестная'));
+    }
+  }
+
+  async function contactsDirectChat(userId, name) {
+    const res = await securePost('/chats/private/direct', { userId });
+    const data = await res.json();
+    if (data.ok) {
+      closeSettings();
+      await loadChats();
+      socket.emit('join_chat', data.chatId);
+      openChat(data.chatId, name, 'user', '', userId, '', 'private');
+    } else alert(data.error || 'Ошибка');
+  }
+
+  async function contactsAddAll(matched) {
+    if (!confirm(`Добавить всех ${matched.length} контактов в чат?`)) return;
+    let success = 0;
+    for (const u of matched) {
+      try {
+        const res = await securePost('/chats/private/direct', { userId: u.id });
+        const data = await res.json();
+        if (data.ok) success++;
+      } catch(e) {}
+    }
+    alert(`✅ Добавлено: ${success} из ${matched.length}`);
+    closeSettings();
+    await loadChats();
+  }
 
   // ===== ЗАПУСК =====
   init();
