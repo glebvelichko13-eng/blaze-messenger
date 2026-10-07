@@ -1,115 +1,678 @@
-/* ===== BLAZE — МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+/* ============================================
+   BLAZE — СИЛЬНАЯ МОБИЛЬНАЯ АДАПТАЦИЯ v2
+   Перебивает ВСЕ старые стили
+   ============================================ */
+
 @media screen and (max-width: 768px) {
 
-  * { -webkit-tap-highlight-color: transparent; }
+  /* ===== ГЛОБАЛЬНЫЙ СБРОС ===== */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
+  }
 
   html, body {
     width: 100vw !important;
+    max-width: 100vw !important;
     height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
+    font-family: Arial, sans-serif !important;
+    display: block !important;
+    justify-content: unset !important;
+    align-items: unset !important;
   }
 
+  /* ===== ГЛАВНЫЙ КОНТЕЙНЕР ===== */
   .app {
     width: 100vw !important;
     max-width: 100vw !important;
     height: 100vh !important;
+    max-height: 100vh !important;
     border-radius: 0 !important;
+    box-shadow: none !important;
     flex-direction: column !important;
     display: flex !important;
+    overflow: hidden !important;
   }
 
+  /* ===== САЙДБАР (ВЕРХ) ===== */
   .sidebar {
     width: 100% !important;
+    max-width: 100% !important;
     height: 45vh !important;
-    min-height: 200px !important;
-    max-height: 50vh !important;
+    max-height: 45vh !important;
+    min-height: 180px !important;
     border-right: none !important;
     border-bottom: 2px solid #2a3942 !important;
     flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
-  .sidebar-header { padding: 8px 12px !important; font-size: 14px !important; }
-  .blaze-logo { font-size: 15px !important; }
-  .sidebar-header .me { font-size: 11px !important; }
-  .header-btns button { font-size: 16px !important; padding: 4px 6px !important; }
+  .sidebar-header {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+    min-height: 40px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
 
-  .stories-bar { padding: 6px 8px !important; gap: 8px !important; }
-  .story-circle { width: 52px !important; }
-  .story-ring { width: 46px !important; height: 46px !important; }
-  .story-name { font-size: 10px !important; width: 52px !important; }
+  .blaze-logo {
+    font-size: 14px !important;
+  }
 
-  .chats-list { flex: 1 !important; overflow-y: auto !important; }
-  .chat-item { padding: 8px 12px !important; }
-  .chat-avatar { width: 36px !important; height: 36px !important; font-size: 14px !important; }
-  .chat-title { font-size: 13px !important; }
-  .chat-subtitle, .chat-status { font-size: 11px !important; }
+  .sidebar-header .me {
+    font-size: 10px !important;
+    margin-top: 1px !important;
+  }
 
-  .create-btns { padding: 6px !important; gap: 4px !important; }
-  .create-btns button { padding: 8px !important; font-size: 12px !important; }
+  .header-btns {
+    gap: 2px !important;
+  }
 
+  .header-btns button {
+    font-size: 15px !important;
+    padding: 3px 5px !important;
+    border-radius: 4px !important;
+  }
+
+  .badge {
+    font-size: 8px !important;
+    padding: 0 4px !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    line-height: 14px !important;
+  }
+
+  /* ===== ИСТОРИИ ===== */
+  .stories-bar {
+    padding: 5px 8px !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    min-height: 70px !important;
+    max-height: 70px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .story-circle {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+  }
+
+  .story-ring {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .story-inner {
+    font-size: 14px !important;
+  }
+
+  .story-name {
+    font-size: 9px !important;
+    width: 50px !important;
+    margin-top: 3px !important;
+  }
+
+  /* ===== СПИСОК ЧАТОВ ===== */
+  .chats-list {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+  }
+
+  .chat-item {
+    padding: 6px 10px !important;
+    gap: 8px !important;
+    min-height: 48px !important;
+  }
+
+  .chat-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    font-size: 13px !important;
+  }
+
+  .chat-info {
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .chat-title {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  .chat-subtitle, .chat-status {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    margin-top: 1px !important;
+  }
+
+  /* ===== КНОПКИ "+ ЛИЧНЫЙ" / "+ ГРУППА" ===== */
+  .create-btns {
+    padding: 5px !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+  }
+
+  .create-btns button {
+    flex: 1 !important;
+    padding: 7px 4px !important;
+    font-size: 11px !important;
+    min-height: 30px !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+  }
+
+  /* ===== MAIN (НИЗ) ===== */
   .main {
     width: 100% !important;
+    max-width: 100% !important;
     height: 55vh !important;
+    max-height: 55vh !important;
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     background: #0b141a !important;
+    overflow: hidden !important;
+    position: relative !important;
   }
 
-  .main-header { padding: 8px 12px !important; font-size: 14px !important; flex-shrink: 0 !important; }
-  .main-header .msub { font-size: 10px !important; }
+  .main-header {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+    min-height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
 
-  .header-actions { padding: 6px 10px !important; gap: 4px !important; flex-wrap: wrap !important; }
-  .header-actions button { padding: 5px 8px !important; font-size: 11px !important; }
+  .main-header .msub {
+    font-size: 9px !important;
+  }
 
-  .messages { flex: 1 !important; padding: 8px !important; gap: 4px !important; overflow-y: auto !important; }
-  .msg { max-width: 88% !important; padding: 6px 10px !important; font-size: 13px !important; border-radius: 8px !important; }
-  .msg-image { max-width: 220px !important; max-height: 280px !important; }
-  .msg-video { max-width: 220px !important; max-height: 280px !important; }
-  .msg-sticker { width: 120px !important; height: 120px !important; }
-  .msg .name { font-size: 11px !important; }
-  .msg .time { font-size: 9px !important; }
+  .header-online {
+    font-size: 9px !important;
+  }
 
-  .input-area { padding: 6px 8px !important; gap: 4px !important; flex-shrink: 0 !important; }
-  .input-area input[type="text"] { padding: 9px 12px !important; font-size: 13px !important; border-radius: 18px !important; }
-  .input-area .icon-btn { padding: 0 8px !important; font-size: 18px !important; }
-  .input-area .send-btn { padding: 0 14px !important; font-size: 16px !important; }
+  .header-actions {
+    padding: 4px 8px !important;
+    gap: 3px !important;
+    flex-wrap: wrap !important;
+    flex-shrink: 0 !important;
+  }
 
-  .modal-box { width: 92vw !important; max-width: 92vw !important; padding: 16px !important; max-height: 85vh !important; }
-  .modal-box h3 { font-size: 16px !important; }
-  .modal-box input[type="text"], .modal-box input[type="password"], .modal-box input[type="number"] { padding: 10px !important; font-size: 13px !important; }
-  .modal-box .actions button { padding: 10px !important; font-size: 13px !important; }
-  .admin-box { width: 96vw !important; max-width: 96vw !important; }
+  .header-actions button {
+    padding: 4px 7px !important;
+    font-size: 10px !important;
+    border-radius: 4px !important;
+  }
 
-  .settings-modal, .privacy-modal { width: 100vw !important; }
-  .settings-header { padding: 12px 15px !important; font-size: 16px !important; }
-  .settings-item { padding: 12px 15px !important; }
-  .settings-item .s-icon { font-size: 18px !important; width: 32px !important; }
-  .settings-item .s-title { font-size: 14px !important; }
-  .settings-item .s-sub { font-size: 11px !important; }
+  /* ===== СООБЩЕНИЯ ===== */
+  .messages {
+    flex: 1 !important;
+    padding: 6px 8px !important;
+    gap: 3px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+  }
 
-  .emoji-panel, .sticker-panel { width: calc(100vw - 20px) !important; left: 10px !important; right: 10px !important; max-height: 45vh !important; }
-  .emoji-grid { grid-template-columns: repeat(7, 1fr) !important; }
-  .emoji-grid button { font-size: 20px !important; padding: 4px !important; }
+  .msg {
+    max-width: 85% !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+    line-height: 1.35 !important;
+  }
+
+  .msg-body {
+    min-width: 0 !important;
+  }
+
+  .msg-image {
+    max-width: 200px !important;
+    max-height: 250px !important;
+    border-radius: 6px !important;
+  }
+
+  .msg-video {
+    max-width: 200px !important;
+    max-height: 250px !important;
+    border-radius: 6px !important;
+  }
+
+  .msg-audio {
+    max-width: 200px !important;
+  }
+
+  .msg-sticker {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .msg .name {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .msg .time {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+  }
+
+  .msg .msg-status {
+    font-size: 9px !important;
+  }
+
+  .msg-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    font-size: 11px !important;
+  }
+
+  .msg-check {
+    font-size: 10px !important;
+  }
+
+  /* ===== ВВОД ===== */
+  .input-area {
+    padding: 5px 6px !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+  }
+
+  .input-area input[type="text"] {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    border-radius: 16px !important;
+    min-width: 0 !important;
+  }
+
+  .input-area .icon-btn {
+    padding: 0 6px !important;
+    font-size: 17px !important;
+    min-width: 30px !important;
+  }
+
+  .input-area .send-btn {
+    padding: 0 12px !important;
+    font-size: 15px !important;
+    min-width: 40px !important;
+  }
+
+  /* ===== МОДАЛКИ ===== */
+  .modal {
+    align-items: flex-start !important;
+    padding-top: 10px !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-box {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    padding: 14px !important;
+    max-height: 92vh !important;
+    border-radius: 12px !important;
+    margin: auto !important;
+  }
+
+  .modal-box h3 {
+    font-size: 15px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .modal-box input[type="text"],
+  .modal-box input[type="password"],
+  .modal-box input[type="number"],
+  .modal-box textarea {
+    padding: 9px 10px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+  }
+
+  .modal-box .actions {
+    gap: 5px !important;
+    margin-top: 8px !important;
+  }
+
+  .modal-box .actions button {
+    padding: 9px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+  }
+
+  .admin-box {
+    width: 96vw !important;
+    max-width: 96vw !important;
+  }
+
+  /* ===== НАСТРОЙКИ ===== */
+  .settings-modal,
+  .privacy-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .settings-header {
+    padding: 10px 14px !important;
+    font-size: 15px !important;
+    min-height: 44px !important;
+  }
+
+  .settings-header button {
+    font-size: 20px !important;
+    padding: 4px 8px !important;
+  }
+
+  .settings-body {
+    padding: 10px !important;
+  }
+
+  .settings-section {
+    margin-bottom: 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .settings-item {
+    padding: 10px 14px !important;
+  }
+
+  .settings-item .s-icon {
+    font-size: 18px !important;
+    width: 30px !important;
+  }
+
+  .settings-item .s-title {
+    font-size: 13px !important;
+  }
+
+  .settings-item .s-sub {
+    font-size: 10px !important;
+  }
+
+  .settings-item .s-arrow {
+    font-size: 16px !important;
+  }
+
+  .privacy-row {
+    padding: 10px 14px !important;
+  }
+
+  .privacy-row .pr-icon { font-size: 17px !important; width: 30px !important; }
+  .privacy-row .pr-title { font-size: 13px !important; }
+  .privacy-row .pr-value { font-size: 11px !important; }
+
+  /* ===== ВЫБОР (Все/Контакты/Никто) ===== */
+  .choice-box {
+    width: 88vw !important;
+    max-width: 88vw !important;
+    padding: 16px !important;
+  }
+
+  .choice-box h3 {
+    font-size: 15px !important;
+  }
+
+  .choice-option {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* ===== ЭМОДЗИ ===== */
+  .emoji-panel,
+  .sticker-panel {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    left: 8px !important;
+    right: 8px !important;
+    max-height: 42vh !important;
+    bottom: 50px !important;
+    padding: 8px !important;
+  }
+
+  .emoji-tabs button, .sticker-tabs button {
+    padding: 5px 4px !important;
+    font-size: 11px !important;
+  }
+
+  .emoji-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  .emoji-grid button {
+    font-size: 19px !important;
+    padding: 3px !important;
+  }
+
+  .sticker-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .sticker-grid .sticker-emoji {
+    font-size: 32px !important;
+  }
+
+  /* ===== ПРОФИЛЬ ===== */
+  .profile-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 32px !important;
+  }
+
+  .profile-name {
+    font-size: 18px !important;
+  }
+
+  .profile-status {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+
+  /* ===== АДМИНКА ===== */
+  .admin-stats {
+    flex-direction: column !important;
+    gap: 5px !important;
+  }
+
+  .admin-stat {
+    padding: 8px !important;
+    min-width: 0 !important;
+  }
+
+  .admin-stat .num {
+    font-size: 18px !important;
+  }
+
+  .admin-stat .lbl {
+    font-size: 10px !important;
+  }
+
+  .admin-tabs {
+    gap: 3px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .admin-tabs button {
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+    border-radius: 5px !important;
+  }
+
+  .admin-user {
+    padding: 8px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .admin-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-user .info .uname { font-size: 12px !important; }
+  .admin-user .info .uphone { font-size: 10px !important; }
+  .admin-user .info .ucreated { font-size: 9px !important; }
+  .admin-user .info .ustatus { font-size: 9px !important; }
+
+  /* ===== ИСТОРИИ (просмотр) ===== */
+  .story-viewer .story-content img,
+  .story-viewer .story-content video {
+    max-width: 100vw !important;
+    max-height: 75vh !important;
+  }
+
+  .story-author-name {
+    font-size: 12px !important;
+  }
+
+  .story-author-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .story-header {
+    top: 15px !important;
+    left: 10px !important;
+    right: 10px !important;
+  }
+
+  /* ===== НОВОСТИ ===== */
+  .news-modal {
+    width: 94vw !important;
+    max-width: 94vw !important;
+  }
+
+  .news-modal .news-title {
+    font-size: 15px !important;
+  }
+
+  .news-modal .news-body {
+    font-size: 13px !important;
+    padding: 15px !important;
+  }
+
+  .news-modal .news-btn {
+    padding: 10px 25px !important;
+    font-size: 13px !important;
+  }
+
+  /* ===== IMAGE VIEWER ===== */
+  .image-viewer img {
+    max-width: 98vw !important;
+    max-height: 98vh !important;
+  }
+
+  .image-viewer .close {
+    font-size: 32px !important;
+    top: 10px !important;
+    right: 15px !important;
+  }
+}
+
+/* ============================================
+   ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ (до 380px)
+   ============================================ */
+@media screen and (max-width: 380px) {
+  html, body { font-size: 12px !important; }
+
+  .sidebar-header { padding: 5px 8px !important; }
+  .blaze-logo { font-size: 13px !important; }
+  .sidebar-header .me { font-size: 9px !important; }
+
+  .header-btns button { font-size: 14px !important; padding: 2px 4px !important; }
+
+  .chat-avatar { width: 30px !important; height: 30px !important; font-size: 11px !important; }
+  .chat-title { font-size: 11px !important; }
+  .chat-subtitle { font-size: 9px !important; }
+
+  .create-btns button { font-size: 10px !important; padding: 6px 3px !important; }
+
+  .main-header { font-size: 12px !important; padding: 5px 8px !important; }
+
+  .msg { max-width: 88% !important; font-size: 11px !important; }
+  .msg-image { max-width: 170px !important; max-height: 220px !important; }
+
+  .input-area input[type="text"] { font-size: 11px !important; padding: 7px 9px !important; }
+  .input-area .icon-btn { font-size: 15px !important; padding: 0 5px !important; }
+  .input-area .send-btn { padding: 0 10px !important; font-size: 14px !important; }
+
+  .emoji-grid { grid-template-columns: repeat(6, 1fr) !important; }
+  .emoji-grid button { font-size: 17px !important; }
+
   .sticker-grid { grid-template-columns: repeat(3, 1fr) !important; }
-
-  .admin-stats { flex-direction: column !important; gap: 6px !important; }
-  .admin-tabs { flex-wrap: wrap !important; gap: 4px !important; }
-  .admin-tabs button { padding: 6px 10px !important; font-size: 11px !important; }
-  .admin-user { flex-wrap: wrap !important; padding: 8px !important; }
-
-  .story-viewer .story-content img, .story-viewer .story-content video { max-width: 100vw !important; max-height: 70vh !important; }
-  .story-author-name { font-size: 13px !important; }
 }
 
-@media screen and (max-width: 400px) {
-  .chat-avatar { width: 32px !important; height: 32px !important; font-size: 12px !important; }
-  .msg { max-width: 92% !important; font-size: 12px !important; }
-  .input-area .icon-btn { padding: 0 6px !important; font-size: 16px !important; }
-}
-
+/* ============================================
+   ЛАНДШАФТНАЯ ОРИЕНТАЦИЯ (телефон горизонтально)
+   ============================================ */
 @media screen and (max-width: 900px) and (orientation: landscape) {
-  .sidebar { height: 40vh !important; }
-  .main { height: 60vh !important; }
+  .sidebar {
+    height: 60vh !important;
+    max-height: 60vh !important;
+  }
+
+  .main {
+    height: 40vh !important;
+    max-height: 40vh !important;
+  }
+
+  .stories-bar {
+    min-height: 55px !important;
+    max-height: 55px !important;
+  }
+
+  .story-ring {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .story-circle { width: 42px !important; }
+  .story-name { font-size: 8px !important; width: 42px !important; }
+}
+
+/* ============================================
+   ПЛАНШЕТЫ (768-1024px)
+   ============================================ */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .app {
+    max-width: 95vw !important;
+    height: 95vh !important;
+  }
+
+  .sidebar {
+    width: 280px !important;
+  }
+
+  .msg {
+    max-width: 75% !important;
+  }
 }
